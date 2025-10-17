@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import Navbar from './components/Navbar';
 import ConnectionModal from './modals/ConnectionModal';
 import TableSelectionView from './views/TableSelectionView';
 import FormBuilderView from './views/FormBuilderView';
 import { fetchDatasets } from './services/api';
+import { sessionStorageUtils } from './utils/sessionStorage';
 
 interface FormField {
   id: string;
@@ -22,6 +23,27 @@ function AppContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedFields, setSelectedFields] = useState<FormField[]>([]);
+
+  // Auto-load datasets if connection exists in session storage
+  useEffect(() => {
+    const loadDatasetsFromSession = async () => {
+      if (state.isConnected && state.connection && state.datasets.length === 0) {
+        setIsLoading(true);
+        setError(null);
+
+        try {
+          const datasets = await fetchDatasets(state.connection);
+          setDatasets(datasets);
+        } catch (err) {
+          setError(err instanceof Error ? err.message : 'Failed to restore datasets from session');
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadDatasetsFromSession();
+  }, [state.isConnected, state.connection, state.datasets.length, setDatasets]);
 
   const handleConnectionSubmit = async (connectionData: {
     environment: string;

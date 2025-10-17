@@ -85,8 +85,8 @@ export default function TableSelectionView({ onFieldSelect }: TableSelectionView
           onClick={handleTableClick}
           style={{
             padding: '0.5rem',
-            backgroundColor: isSelected ? '#007bff' : (isActualRoot ? '#e3f2fd' : isHopelineChild ? '#fff3e0' : '#f5f5f5'),
-            border: `1px solid ${isSelected ? '#007bff' : '#ddd'}`,
+            backgroundColor: isSelected ? '#0083E0' : (isActualRoot ? '#A0D7FF' : isHopelineChild ? '#FEF6CD' : '#EFEBF2'),
+            border: `1px solid ${isSelected ? '#0083E0' : '#87A7C3'}`,
             borderRadius: '4px',
             marginBottom: '0.25rem',
             display: 'flex',
@@ -97,7 +97,7 @@ export default function TableSelectionView({ onFieldSelect }: TableSelectionView
           }}
         >
           <FaTable style={{
-            color: isSelected ? 'white' : (isActualRoot ? '#1976d2' : isHopelineChild ? '#f57c00' : '#666')
+            color: isSelected ? 'white' : (isActualRoot ? '#003052' : isHopelineChild ? '#E56B38' : '#4C677F')
           }} />
           <div>
             <div style={{
@@ -106,11 +106,11 @@ export default function TableSelectionView({ onFieldSelect }: TableSelectionView
               color: isSelected ? 'white' : 'inherit'
             }}>
               {node.label}
-              {isHopelineChild && !isSelected && <span style={{ fontSize: '0.7rem', color: '#f57c00', marginLeft: '0.5rem' }}>(hopeline)</span>}
+              {isHopelineChild && !isSelected && <span style={{ fontSize: '0.7rem', color: '#E56B38', marginLeft: '0.5rem' }}>(hopeline)</span>}
             </div>
             <div style={{
               fontSize: '0.8rem',
-              color: isSelected ? 'rgba(255,255,255,0.8)' : '#666'
+              color: isSelected ? 'rgba(255,255,255,0.8)' : '#4C677F'
             }}>
               {node.title} ({tableName})
             </div>
@@ -128,7 +128,7 @@ export default function TableSelectionView({ onFieldSelect }: TableSelectionView
       width: '350px',
       height: '100%',
       backgroundColor: 'white',
-      borderRight: '1px solid #dee2e6',
+      borderRight: '1px solid #DAE8F4',
       padding: '1rem',
       overflow: 'auto'
     }}>
@@ -158,7 +158,7 @@ export default function TableSelectionView({ onFieldSelect }: TableSelectionView
               style={{
                 width: '100%',
                 padding: '0.5rem',
-                border: '1px solid #ccc',
+                border: '1px solid #87A7C3',
                 borderRadius: '4px',
                 fontSize: '0.9rem'
               }}
@@ -173,7 +173,7 @@ export default function TableSelectionView({ onFieldSelect }: TableSelectionView
             </select>
 
             {!state.isConnected && (
-              <p style={{ fontSize: '0.8rem', color: '#666', margin: '0.5rem 0 0 0' }}>
+              <p style={{ fontSize: '0.8rem', color: '#4C677F', margin: '0.5rem 0 0 0' }}>
                 Connect first to load schemas
               </p>
             )}
@@ -207,7 +207,7 @@ export default function TableSelectionView({ onFieldSelect }: TableSelectionView
               style={{
                 width: '100%',
                 padding: '0.5rem',
-                border: '1px solid #ccc',
+                border: '1px solid #87A7C3',
                 borderRadius: '4px',
                 fontSize: '0.9rem',
                 marginBottom: '0.5rem'
@@ -223,7 +223,7 @@ export default function TableSelectionView({ onFieldSelect }: TableSelectionView
             </select>
 
             {!state.selectedDataset && (
-              <p style={{ fontSize: '0.8rem', color: '#666', margin: '0.5rem 0 0 0' }}>
+              <p style={{ fontSize: '0.8rem', color: '#4C677F', margin: '0.5rem 0 0 0' }}>
                 Select a schema first to load tables
               </p>
             )}
@@ -235,7 +235,7 @@ export default function TableSelectionView({ onFieldSelect }: TableSelectionView
 
                 <div style={{ marginBottom: '0.3rem' }}>
                   <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '1rem', fontWeight: 'bold' }}>
-                    Label: <span style={{ color: 'red' }}>*</span>
+                    Label: <span style={{ color: '#B83230' }}>*</span>
                   </label>
                   <input
                     type="text"
@@ -244,7 +244,7 @@ export default function TableSelectionView({ onFieldSelect }: TableSelectionView
                     style={{
                       width: '80%',
                       padding: '0.25rem',
-                      border: '1px solid #ccc',
+                      border: '1px solid #87A7C3',
                       borderRadius: '4px',
                       fontSize: '0.8rem'
                     }}
@@ -254,7 +254,7 @@ export default function TableSelectionView({ onFieldSelect }: TableSelectionView
 
                 <div style={{ marginBottom: '1rem' }}>
                   <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '1rem', fontWeight: 'bold' }}>
-                    Title: <span style={{ color: 'red' }}>*</span>
+                    Title: <span style={{ color: '#B83230' }}>*</span>
                   </label>
                   <input
                     type="text"
@@ -263,7 +263,7 @@ export default function TableSelectionView({ onFieldSelect }: TableSelectionView
                     style={{
                       width: '80%',
                       padding: '0.25rem',
-                      border: '1px solid #ccc',
+                      border: '1px solid #87A7C3',
                       borderRadius: '4px',
                       fontSize: '0.8rem'
                     }}
@@ -323,7 +323,7 @@ export default function TableSelectionView({ onFieldSelect }: TableSelectionView
                       style={{
                         width: '50%',
                         padding: '0.5rem',
-                        backgroundColor: label && title ? '#289588' : '#6c757d',
+                        backgroundColor: label && title ? '#007B6C' : '#4C677F',
                         color: 'white',
                         border: 'none',
                         borderRadius: '4px',
@@ -367,10 +367,10 @@ export default function TableSelectionView({ onFieldSelect }: TableSelectionView
 
           {expandedSections.treeview && (
             <div style={{
-              border: '1px solid #dee2e6',
+              border: '1px solid #DAE8F4',
               borderRadius: '4px',
               padding: '0.5rem',
-              backgroundColor: '#fafafa'
+              backgroundColor: '#DAE8F4'
             }}>
               {state.treeStructure.map((rootNode, index) => (
                 <TreeNode
