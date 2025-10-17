@@ -1,0 +1,2 @@
+I have a React + Redux app for managing datasets and tables.
+ Users can select a dataset, then select a main table, optional subtables, and add new tabs or root tables. Currently the modal code is buggy, with direct DOM manipulation (getElementById, classList) and inconsistent dropdown behavior
