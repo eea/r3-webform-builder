@@ -46,6 +46,7 @@ interface AppState {
   treeStructure: TreeNode[];
   hasRootTable: boolean;
   selectedTreeTable: string;
+  webformName: string;
 }
 
 interface AppContextType {
@@ -59,6 +60,7 @@ interface AppContextType {
   addRootTableToTree: (tableId: string, label: string, title: string) => void;
   addChildTableToTree: (tableId: string, label: string, title: string) => void;
   setSelectedTreeTable: (tableId: string) => void;
+  setWebformName: (name: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -74,7 +76,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     tabs: [],
     treeStructure: [],
     hasRootTable: false,
-    selectedTreeTable: ''
+    selectedTreeTable: '',
+    webformName: ''
   });
 
   // Load connection data from session storage on component mount
@@ -191,6 +194,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  const setWebformName = (name: string) => {
+    setState(prev => ({
+      ...prev,
+      webformName: name
+    }));
+  };
+
   return (
     <AppContext.Provider value={{
       state,
@@ -202,7 +212,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       addTab,
       addRootTableToTree,
       addChildTableToTree,
-      setSelectedTreeTable
+      setSelectedTreeTable,
+      setWebformName
     }}>
       {children}
     </AppContext.Provider>

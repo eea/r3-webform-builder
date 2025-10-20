@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { FaTable, FaLayerGroup, FaPlusCircle, FaFolder, FaSitemap } from 'react-icons/fa';
+import { FaTable, FaLayerGroup, FaPlusCircle, FaFolder, FaSitemap, FaWpforms } from 'react-icons/fa';
 
 interface Field {
   id: string;
@@ -15,7 +15,7 @@ interface TableSelectionViewProps {
 }
 
 export default function TableSelectionView({ onFieldSelect }: TableSelectionViewProps) {
-  const { state, setSelectedDataset, setSelectedTable, addRootTable, addTab, addRootTableToTree, addChildTableToTree, setSelectedTreeTable } = useApp();
+  const { state, setSelectedDataset, setSelectedTable, addRootTable, addTab, addRootTableToTree, addChildTableToTree, setSelectedTreeTable, setWebformName } = useApp();
   const [label, setLabel] = useState<string>('');
   const [title, setTitle] = useState<string>('');
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
@@ -132,6 +132,37 @@ export default function TableSelectionView({ onFieldSelect }: TableSelectionView
       padding: '1rem',
       overflow: 'auto'
     }}>
+      {/* Webform Name */}
+      <div style={{ marginBottom: '1.5rem' }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '0.5rem'
+        }}>
+          <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 'bold' }}>
+            <FaWpforms /> Webform Name
+          </h3>
+        </div>
+        <input
+          type="text"
+          value={state.webformName}
+          onChange={(e) => setWebformName(e.target.value)}
+          style={{
+            width: '100%',
+            padding: '0.5rem',
+            border: '1px solid #87A7C3',
+            borderRadius: '4px',
+            fontSize: '0.9rem',
+            boxSizing: 'border-box'
+          }}
+          placeholder="Enter webform name"
+        />
+        <p style={{ fontSize: '0.8rem', color: '#4C677F', margin: '0.5rem 0 0 0' }}>
+          This name will be used for JSON download/upload
+        </p>
+      </div>
+
       {/* Dataset Selection */}
       <div style={{ marginBottom: '1.5rem' }}>
         <div
@@ -242,11 +273,12 @@ export default function TableSelectionView({ onFieldSelect }: TableSelectionView
                     value={label}
                     onChange={(e) => setLabel(e.target.value)}
                     style={{
-                      width: '80%',
-                      padding: '0.25rem',
+                      width: '100%',
+                      padding: '0.5rem',
                       border: '1px solid #87A7C3',
                       borderRadius: '4px',
-                      fontSize: '0.8rem'
+                      fontSize: '0.9rem',
+                      boxSizing: 'border-box'
                     }}
                     placeholder="Enter label"
                   />
@@ -261,11 +293,12 @@ export default function TableSelectionView({ onFieldSelect }: TableSelectionView
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     style={{
-                      width: '80%',
-                      padding: '0.25rem',
+                      width: '100%',
+                      padding: '0.5rem',
                       border: '1px solid #87A7C3',
                       borderRadius: '4px',
-                      fontSize: '0.8rem'
+                      fontSize: '0.9rem',
+                      boxSizing: 'border-box'
                     }}
                     placeholder="Enter title"
                   />

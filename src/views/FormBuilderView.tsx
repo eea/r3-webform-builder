@@ -405,7 +405,7 @@ export default function FormBuilderPanel({
   onGenerateJSON,
   onClearForm
 }: FormBuilderViewProps) {
-  const { state, setSelectedTreeTable } = useApp();
+  const { state, setSelectedTreeTable, setWebformName } = useApp();
   const [showJSON, setShowJSON] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [activeField, setActiveField] = useState<Field | null>(null);
@@ -516,7 +516,7 @@ export default function FormBuilderPanel({
   };
 
   const generateFormJSON = () => {
-    // Generate overview section showing the hierarchy
+    // Generate form structure with webform name
     const overview: any[] = [];
 
     // Find root table and its fields for overview
@@ -615,6 +615,7 @@ export default function FormBuilderPanel({
     }
 
     const formStructure = {
+      webformName: state.webformName || 'Untitled Webform',
       overview,
       tables,
       hideTabularData: false
@@ -662,7 +663,11 @@ export default function FormBuilderPanel({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'form-config.json';
+    // Use webform name as filename, or default to 'form-config.json'
+    const filename = state.webformName
+      ? `${state.webformName.replace(/[^a-z0-9_-]/gi, '_')}.json`
+      : 'form-config.json';
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -680,6 +685,11 @@ export default function FormBuilderPanel({
       if (!jsonData || !jsonData.tables || !Array.isArray(jsonData.tables)) {
         alert('Invalid JSON format. Expected a form configuration with tables array.');
         return;
+      }
+
+      // Extract and set webform name if present
+      if (jsonData.webformName) {
+        setWebformName(jsonData.webformName);
       }
 
       // Clear existing form state
