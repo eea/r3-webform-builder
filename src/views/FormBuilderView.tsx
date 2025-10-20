@@ -405,7 +405,7 @@ export default function FormBuilderPanel({
   onGenerateJSON,
   onClearForm
 }: FormBuilderViewProps) {
-  const { state } = useApp();
+  const { state, setSelectedTreeTable } = useApp();
   const [showJSON, setShowJSON] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [activeField, setActiveField] = useState<Field | null>(null);
@@ -672,6 +672,71 @@ export default function FormBuilderPanel({
   const handlePushToRN3 = () => {
     // TODO: Implement Push to RN3 functionality
     alert('Push to RN3 functionality will be implemented soon!');
+  };
+
+  const handleUploadJSON = (jsonData: any) => {
+    try {
+      // Validate the JSON structure
+      if (!jsonData || !jsonData.tables || !Array.isArray(jsonData.tables)) {
+        alert('Invalid JSON format. Expected a form configuration with tables array.');
+        return;
+      }
+
+      // Clear existing form state
+      setFormFields([]);
+      setSelectedFormField(null);
+
+      // Process tables from JSON and restore form fields
+      const restoredFields: FormField[] = [];
+      let firstTableId: string | null = null;
+
+      jsonData.tables.forEach((table: any, tableIndex: number) => {
+        if (table.elements && Array.isArray(table.elements)) {
+          table.elements.forEach((element: any, elementIndex: number) => {
+            if (element.type === 'FIELD') {
+              // Find the corresponding field in available datasets
+              const selectedDataset = state.datasets.find(d => d.id === state.selectedDataset);
+              const tableData = selectedDataset?.tables.find(t => t.name === table.name);
+              const fieldData = tableData?.fields.find(f => f.name === element.name);
+
+              if (fieldData && tableData) {
+                // Set the first table ID we encounter
+                if (firstTableId === null) {
+                  firstTableId = tableData.id;
+                }
+
+                const formField: FormField = {
+                  ...fieldData,
+                  formId: `restored_${tableData.id}_${fieldData.id}_${Date.now()}_${elementIndex}`,
+                  tableId: tableData.id,
+                  customTitle: element.title || fieldData.name,
+                  customTooltip: element.tooltip || fieldData.description,
+                  customRequired: element.showRequiredCharacter ?? fieldData.required,
+                  isPrimary: element.isPrimary || false
+                };
+                restoredFields.push(formField);
+              }
+            }
+          });
+        }
+      });
+
+      if (restoredFields.length > 0) {
+        setFormFields(restoredFields);
+
+        // Automatically select the first table that has restored fields
+        if (firstTableId) {
+          setSelectedTreeTable(firstTableId);
+        }
+
+        alert(`Successfully restored form with ${restoredFields.length} fields from JSON.`);
+      } else {
+        alert('No matching fields found in the current dataset. Please ensure you have the correct dataset selected.');
+      }
+    } catch (error) {
+      alert('Error processing JSON file. Please check the file format and try again.');
+      console.error('JSON upload error:', error);
+    }
   };
 
   return (
@@ -1444,6 +1509,7 @@ export default function FormBuilderPanel({
             onDownloadJSON={handleDownloadJSON}
             onPushToRN3={handlePushToRN3}
             onGenerateJSON={onGenerateJSON}
+            onUploadJSON={handleUploadJSON}
           />
         </div>
       </div>

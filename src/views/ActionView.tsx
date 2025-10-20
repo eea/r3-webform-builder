@@ -1,12 +1,41 @@
-import { FaDownload, FaUpload, FaCode } from 'react-icons/fa';
+import { useRef } from 'react';
+import { FaDownload, FaUpload, FaCode, FaFileUpload } from 'react-icons/fa';
 
 interface ActionViewProps {
   onDownloadJSON: () => void;
   onPushToRN3: () => void;
   onGenerateJSON: () => void;
+  onUploadJSON: (jsonData: any) => void;
 }
 
-export default function ActionView({ onDownloadJSON, onPushToRN3, onGenerateJSON }: ActionViewProps) {
+export default function ActionView({ onDownloadJSON, onPushToRN3, onGenerateJSON, onUploadJSON }: ActionViewProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && file.type === 'application/json') {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const jsonData = JSON.parse(e.target?.result as string);
+          onUploadJSON(jsonData);
+        } catch (error) {
+          alert('Invalid JSON file. Please select a valid JSON file.');
+        }
+      };
+      reader.readAsText(file);
+    } else {
+      alert('Please select a JSON file.');
+    }
+    // Reset the input so the same file can be uploaded again
+    if (event.target) {
+      event.target.value = '';
+    }
+  };
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
   return (
     <div style={{
       borderTop: '1px solid #DAE8F4',
@@ -28,6 +57,39 @@ export default function ActionView({ onDownloadJSON, onPushToRN3, onGenerateJSON
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <button
+          onClick={handleUploadClick}
+          style={{
+            width: '100%',
+            padding: '0.75rem 1rem',
+            backgroundColor: '#E97C00',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '0.9rem',
+            fontWeight: '600',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            transition: 'background-color 0.2s ease'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#C76800'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#E97C00'}
+        >
+          <FaFileUpload />
+          Upload JSON
+        </button>
+
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileUpload}
+          accept=".json"
+          style={{ display: 'none' }}
+        />
+
         <button
           onClick={() => {
             onGenerateJSON();
