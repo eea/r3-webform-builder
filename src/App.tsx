@@ -6,6 +6,7 @@ import TableSelectionView from './views/TableSelectionView';
 import FormBuilderView from './views/FormBuilderView';
 import { fetchDatasets } from './services/api';
 import { sessionStorageUtils } from './utils/sessionStorage';
+import { FaRegSquareCaretRight, FaRegSquareCaretLeft } from 'react-icons/fa6';
 
 interface FormField {
   id: string;
@@ -23,6 +24,7 @@ function AppContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedFields, setSelectedFields] = useState<FormField[]>([]);
+  const [isLeftPanelVisible, setIsLeftPanelVisible] = useState(true);
 
   // Auto-load datasets if connection exists in session storage
   useEffect(() => {
@@ -117,7 +119,49 @@ function AppContent() {
           </div>
         ) : (
           <>
-            <TableSelectionView onFieldSelect={handleFieldSelect} />
+            {/* Toggle icon for left panel */}
+            {isLeftPanelVisible ? (
+              <FaRegSquareCaretLeft
+                onClick={() => setIsLeftPanelVisible(false)}
+                style={{
+                  position: 'absolute',
+                  top: '1rem',
+                  left: '0.5rem',
+                  zIndex: 100,
+                  cursor: 'pointer',
+                  color: '#0083E0',
+                  fontSize: '1.5rem'
+                }}
+                title="Hide panel"
+              />
+            ) : (
+              <FaRegSquareCaretRight
+                onClick={() => setIsLeftPanelVisible(true)}
+                style={{
+                  position: 'absolute',
+                  top: '1rem',
+                  left: '0.5rem',
+                  zIndex: 100,
+                  cursor: 'pointer',
+                  color: '#0083E0',
+                  fontSize: '1.5rem'
+                }}
+                title="Show panel"
+              />
+            )}
+
+            {/* Left panel - collapsed or expanded */}
+            <div style={{
+              width: isLeftPanelVisible ? '350px' : '40px',
+              height: '100%',
+              backgroundColor: 'white',
+              borderRight: '1px solid #DAE8F4',
+              transition: 'width 0.3s ease',
+              overflow: 'hidden'
+            }}>
+              {isLeftPanelVisible && <TableSelectionView onFieldSelect={handleFieldSelect} />}
+            </div>
+
             <FormBuilderView
               selectedFields={selectedFields}
               onRemoveField={handleRemoveField}

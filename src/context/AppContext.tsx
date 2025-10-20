@@ -80,14 +80,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     webformName: ''
   });
 
-  // Load connection data from session storage on component mount
+  // Load connection data, webform name, and selected dataset from session storage on component mount
   useEffect(() => {
     const savedConnection = sessionStorageUtils.loadConnection();
-    if (savedConnection) {
+    const savedWebformName = sessionStorageUtils.loadWebformName();
+    const savedSelectedDataset = sessionStorageUtils.loadSelectedDataset();
+
+    if (savedConnection || savedWebformName || savedSelectedDataset) {
       setState(prev => ({
         ...prev,
-        connection: savedConnection,
-        isConnected: true
+        ...(savedConnection && { connection: savedConnection, isConnected: true }),
+        ...(savedWebformName && { webformName: savedWebformName }),
+        ...(savedSelectedDataset && { selectedDataset: savedSelectedDataset })
       }));
     }
   }, []);
@@ -111,6 +115,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const setSelectedDataset = (datasetId: string) => {
+    // Save to session storage
+    sessionStorageUtils.saveSelectedDataset(datasetId);
+
     setState(prev => ({
       ...prev,
       selectedDataset: datasetId,
@@ -195,6 +202,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const setWebformName = (name: string) => {
+    // Save to session storage
+    sessionStorageUtils.saveWebformName(name);
+
     setState(prev => ({
       ...prev,
       webformName: name

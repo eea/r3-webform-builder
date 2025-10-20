@@ -5,6 +5,8 @@ interface ConnectionData {
 }
 
 const CONNECTION_STORAGE_KEY = 'r3-webform-builder-connection';
+const WEBFORM_NAME_STORAGE_KEY = 'r3-webform-builder-name';
+const SELECTED_DATASET_STORAGE_KEY = 'r3-webform-builder-selected-dataset';
 
 export const sessionStorageUtils = {
   saveConnection: (connection: ConnectionData): void => {
@@ -33,6 +35,58 @@ export const sessionStorageUtils = {
       sessionStorage.removeItem(CONNECTION_STORAGE_KEY);
     } catch (error) {
       console.warn('Failed to clear connection data from session storage:', error);
+    }
+  },
+
+  saveWebformName: (name: string): void => {
+    try {
+      sessionStorage.setItem(WEBFORM_NAME_STORAGE_KEY, name);
+    } catch (error) {
+      console.warn('Failed to save webform name to session storage:', error);
+    }
+  },
+
+  loadWebformName: (): string => {
+    try {
+      const stored = sessionStorage.getItem(WEBFORM_NAME_STORAGE_KEY);
+      return stored || '';
+    } catch (error) {
+      console.warn('Failed to load webform name from session storage:', error);
+      return '';
+    }
+  },
+
+  clearWebformName: (): void => {
+    try {
+      sessionStorage.removeItem(WEBFORM_NAME_STORAGE_KEY);
+    } catch (error) {
+      console.warn('Failed to clear webform name from session storage:', error);
+    }
+  },
+
+  saveSelectedDataset: (datasetId: string): void => {
+    try {
+      sessionStorage.setItem(SELECTED_DATASET_STORAGE_KEY, datasetId);
+    } catch (error) {
+      console.warn('Failed to save selected dataset to session storage:', error);
+    }
+  },
+
+  loadSelectedDataset: (): string => {
+    try {
+      const stored = sessionStorage.getItem(SELECTED_DATASET_STORAGE_KEY);
+      return stored || '';
+    } catch (error) {
+      console.warn('Failed to load selected dataset from session storage:', error);
+      return '';
+    }
+  },
+
+  clearSelectedDataset: (): void => {
+    try {
+      sessionStorage.removeItem(SELECTED_DATASET_STORAGE_KEY);
+    } catch (error) {
+      console.warn('Failed to clear selected dataset from session storage:', error);
     }
   }
 };

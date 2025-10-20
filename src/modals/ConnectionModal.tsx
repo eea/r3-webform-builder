@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { sessionStorageUtils } from '../utils/sessionStorage';
 
 interface ConnectionModalProps {
   isOpen: boolean;
@@ -11,9 +12,21 @@ interface ConnectionModalProps {
 }
 
 export default function ConnectionModal({ isOpen, onClose, onSubmit }: ConnectionModalProps) {
-  const [environment, setEnvironment] = useState('sandbox');
-  const [apiKey, setApiKey] = useState('2ad75cfa-7021-4332-9557-877cab580268');
-  const [dataflowId, setDataflowId] = useState('11734');
+  const [environment, setEnvironment] = useState('');
+  const [apiKey, setApiKey] = useState('');
+  const [dataflowId, setDataflowId] = useState('');
+
+  // Load saved connection settings when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      const savedConnection = sessionStorageUtils.loadConnection();
+      if (savedConnection) {
+        setEnvironment(savedConnection.environment);
+        setApiKey(savedConnection.apiKey);
+        setDataflowId(savedConnection.dataflowId);
+      }
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -58,7 +71,9 @@ export default function ConnectionModal({ isOpen, onClose, onSubmit }: Connectio
                 border: '1px solid #ccc',
                 borderRadius: '4px'
               }}
+              required
             >
+              <option value="">Select Environment</option>
               <option value="production">Production</option>
               <option value="test">Test</option>
               <option value="sandbox">Sandbox</option>

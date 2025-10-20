@@ -125,23 +125,24 @@ export default function TableSelectionView({ onFieldSelect }: TableSelectionView
 
   return (
     <div style={{
-      width: '350px',
+      width: '100%',
       height: '100%',
       backgroundColor: 'white',
-      borderRight: '1px solid #DAE8F4',
-      padding: '1rem',
-      overflow: 'auto'
+      padding: '0.75rem',
+      paddingTop: '3rem',
+      overflow: 'auto',
+      boxSizing: 'border-box'
     }}>
       {/* Webform Name */}
-      <div style={{ marginBottom: '1.5rem' }}>
+      <div style={{ marginBottom: '1rem' }}>
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '0.5rem'
+          marginBottom: '0.25rem'
         }}>
-          <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 'bold' }}>
-            <FaWpforms /> Webform Name
+          <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 'bold' }}>
+            <FaWpforms style={{ fontSize: '0.85rem' }} /> Webform Name
           </h3>
         </div>
         <input
@@ -150,35 +151,35 @@ export default function TableSelectionView({ onFieldSelect }: TableSelectionView
           onChange={(e) => setWebformName(e.target.value)}
           style={{
             width: '100%',
-            padding: '0.5rem',
+            padding: '0.4rem',
             border: '1px solid #87A7C3',
             borderRadius: '4px',
-            fontSize: '0.9rem',
+            fontSize: '0.85rem',
             boxSizing: 'border-box'
           }}
           placeholder="Enter webform name"
         />
-        <p style={{ fontSize: '0.8rem', color: '#4C677F', margin: '0.5rem 0 0 0' }}>
+        <p style={{ fontSize: '0.7rem', color: '#4C677F', margin: '0.25rem 0 0 0' }}>
           This name will be used for JSON download/upload
         </p>
       </div>
 
       {/* Dataset Selection */}
-      <div style={{ marginBottom: '1.5rem' }}>
+      <div style={{ marginBottom: '1rem' }}>
         <div
           style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
             cursor: 'pointer',
-            marginBottom: '0.5rem'
+            marginBottom: '0.25rem'
           }}
           onClick={() => toggleSection('dataset')}
         >
-          <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 'bold' }}>
-            <FaLayerGroup/> Dataset
+          <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 'bold' }}>
+            <FaLayerGroup style={{ fontSize: '0.85rem' }} /> Dataset
           </h3>
-          <span>{expandedSections.dataset ? '▼' : '▶'}</span>
+          <span style={{ fontSize: '0.8rem' }}>{expandedSections.dataset ? '▼' : '▶'}</span>
         </div>
 
         {expandedSections.dataset && (
@@ -188,10 +189,11 @@ export default function TableSelectionView({ onFieldSelect }: TableSelectionView
               onChange={(e) => setSelectedDataset(e.target.value)}
               style={{
                 width: '100%',
-                padding: '0.5rem',
+                padding: '0.4rem',
                 border: '1px solid #87A7C3',
                 borderRadius: '4px',
-                fontSize: '0.9rem'
+                fontSize: '0.85rem',
+                boxSizing: 'border-box'
               }}
               disabled={!state.isConnected}
             >
@@ -204,7 +206,7 @@ export default function TableSelectionView({ onFieldSelect }: TableSelectionView
             </select>
 
             {!state.isConnected && (
-              <p style={{ fontSize: '0.8rem', color: '#4C677F', margin: '0.5rem 0 0 0' }}>
+              <p style={{ fontSize: '0.7rem', color: '#4C677F', margin: '0.25rem 0 0 0' }}>
                 Connect first to load schemas
               </p>
             )}
@@ -213,21 +215,21 @@ export default function TableSelectionView({ onFieldSelect }: TableSelectionView
       </div>
 
       {/* Table Selection */}
-      <div style={{ marginBottom: '1.5rem' }}>
+      <div style={{ marginBottom: '1rem' }}>
         <div
           style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
             cursor: 'pointer',
-            marginBottom: '0.5rem'
+            marginBottom: '0.25rem'
           }}
           onClick={() => toggleSection('tables')}
         >
-          <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 'bold' }}>
-            <FaTable/> Tables
+          <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 'bold' }}>
+            <FaTable style={{ fontSize: '0.85rem' }} /> Tables
           </h3>
-          <span>{expandedSections.tables ? '▼' : '▶'}</span>
+          <span style={{ fontSize: '0.8rem' }}>{expandedSections.tables ? '▼' : '▶'}</span>
         </div>
 
         {expandedSections.tables && (
@@ -237,11 +239,12 @@ export default function TableSelectionView({ onFieldSelect }: TableSelectionView
               onChange={(e) => handleTableSelect(e.target.value)}
               style={{
                 width: '100%',
-                padding: '0.5rem',
+                padding: '0.4rem',
                 border: '1px solid #87A7C3',
                 borderRadius: '4px',
-                fontSize: '0.9rem',
-                marginBottom: '0.5rem'
+                fontSize: '0.85rem',
+                marginBottom: '0.5rem',
+                boxSizing: 'border-box'
               }}
               disabled={!state.selectedDataset}
             >
@@ -254,7 +257,7 @@ export default function TableSelectionView({ onFieldSelect }: TableSelectionView
             </select>
 
             {!state.selectedDataset && (
-              <p style={{ fontSize: '0.8rem', color: '#4C677F', margin: '0.5rem 0 0 0' }}>
+              <p style={{ fontSize: '0.7rem', color: '#4C677F', margin: '0.25rem 0 0 0' }}>
                 Select a schema first to load tables
               </p>
             )}
@@ -264,8 +267,8 @@ export default function TableSelectionView({ onFieldSelect }: TableSelectionView
               <div style={{  borderRadius: '1px' }}>
 
 
-                <div style={{ marginBottom: '0.3rem' }}>
-                  <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '1rem', fontWeight: 'bold' }}>
+                <div style={{ marginBottom: '0.5rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.85rem', fontWeight: 'bold' }}>
                     Label: <span style={{ color: '#B83230' }}>*</span>
                   </label>
                   <input
@@ -274,18 +277,18 @@ export default function TableSelectionView({ onFieldSelect }: TableSelectionView
                     onChange={(e) => setLabel(e.target.value)}
                     style={{
                       width: '100%',
-                      padding: '0.5rem',
+                      padding: '0.4rem',
                       border: '1px solid #87A7C3',
                       borderRadius: '4px',
-                      fontSize: '0.9rem',
+                      fontSize: '0.85rem',
                       boxSizing: 'border-box'
                     }}
                     placeholder="Enter label"
                   />
                 </div>
 
-                <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '1rem', fontWeight: 'bold' }}>
+                <div style={{ marginBottom: '0.75rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.85rem', fontWeight: 'bold' }}>
                     Title: <span style={{ color: '#B83230' }}>*</span>
                   </label>
                   <input
@@ -294,17 +297,17 @@ export default function TableSelectionView({ onFieldSelect }: TableSelectionView
                     onChange={(e) => setTitle(e.target.value)}
                     style={{
                       width: '100%',
-                      padding: '0.5rem',
+                      padding: '0.4rem',
                       border: '1px solid #87A7C3',
                       borderRadius: '4px',
-                      fontSize: '0.9rem',
+                      fontSize: '0.85rem',
                       boxSizing: 'border-box'
                     }}
                     placeholder="Enter title"
                   />
                 </div>
 
-                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+                <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '0.75rem' }}>
                   {!state.hasRootTable && (
                     <>
                       <button
@@ -312,40 +315,40 @@ export default function TableSelectionView({ onFieldSelect }: TableSelectionView
                         disabled={!label || !title}
                         style={{
                           flex: 1,
-                          padding: '0.5rem',
+                          padding: '0.4rem 0.3rem',
                           backgroundColor: label && title ? '#0083E0' : '#A0D7FF',
                           color: 'white',
                           border: 'none',
                           borderRadius: '4px',
                           cursor: label && title ? 'pointer' : 'not-allowed',
-                          fontSize: '0.8rem',
+                          fontSize: '0.75rem',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          gap: '0.25rem'
+                          gap: '0.2rem'
                         }}
                       >
-                        <FaPlusCircle /> Root Table
+                        <FaPlusCircle size={10} /> Root
                       </button>
                       <button
                         onClick={handleAddTab}
                         disabled={!label || !title}
                         style={{
                           flex: 1,
-                          padding: '0.5rem',
+                          padding: '0.4rem 0.3rem',
                           backgroundColor: label && title ? '#0083E0' : '#A0D7FF',
                           color: 'white',
                           border: 'none',
                           borderRadius: '4px',
                           cursor: label && title ? 'pointer' : 'not-allowed',
-                          fontSize: '0.8rem',
+                          fontSize: '0.75rem',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          gap: '0.25rem'
+                          gap: '0.2rem'
                         }}
                       >
-                        <FaPlusCircle /> Table
+                        <FaPlusCircle size={10} /> Table
                       </button>
                     </>
                   )}
@@ -355,20 +358,20 @@ export default function TableSelectionView({ onFieldSelect }: TableSelectionView
                       disabled={!label || !title}
                       style={{
                         width: '50%',
-                        padding: '0.5rem',
+                        padding: '0.4rem 0.3rem',
                         backgroundColor: label && title ? '#007B6C' : '#4C677F',
                         color: 'white',
                         border: 'none',
                         borderRadius: '4px',
                         cursor: label && title ? 'pointer' : 'not-allowed',
-                        fontSize: '0.8rem',
+                        fontSize: '0.75rem',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        gap: '0.25rem'
+                        gap: '0.2rem'
                       }}
                     >
-                      <FaPlusCircle /> Table
+                      <FaPlusCircle size={10} /> Table
                     </button>
                   )}
                 </div>
@@ -381,21 +384,21 @@ export default function TableSelectionView({ onFieldSelect }: TableSelectionView
 
       {/* TreeView Section */}
       {state.treeStructure.length > 0 && (
-        <div style={{ marginBottom: '1.5rem' }}>
+        <div style={{ marginBottom: '1rem' }}>
           <div
             style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
               cursor: 'pointer',
-              marginBottom: '0.5rem'
+              marginBottom: '0.25rem'
             }}
             onClick={() => toggleSection('treeview')}
           >
-            <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 'bold' }}>
-              <FaSitemap /> Table Structure
+            <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 'bold' }}>
+              <FaSitemap style={{ fontSize: '0.85rem' }} /> Table Structure
             </h3>
-            <span>{expandedSections.treeview ? '▼' : '▶'}</span>
+            <span style={{ fontSize: '0.8rem' }}>{expandedSections.treeview ? '▼' : '▶'}</span>
           </div>
 
           {expandedSections.treeview && (
