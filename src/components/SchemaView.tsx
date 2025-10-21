@@ -80,46 +80,41 @@ export default function SchemaView({ onFieldSelect }: SchemaViewProps) {
       setSelectedTreeTable(node.tableId);
     };
 
+    // Determine node type for styling
+    const nodeType = isActualRoot ? 'root' : isHopelineChild ? 'hopeline' : 'child';
+
+    const containerClass = level > 0 ? 'tree-child-node' : '';
+
     return (
-      <div style={{ marginLeft: `${level * 20}px` }}>
+      <div className={`tree-node ${containerClass}`}>
         <div
+          className={`tree-node-content ${isSelected ? 'selected' : ''}`}
           onClick={handleTableClick}
-          style={{
-            padding: '0.5rem',
-            backgroundColor: isSelected ? '#0083E0' : (isActualRoot ? '#A0D7FF' : isHopelineChild ? '#FEF6CD' : '#EFEBF2'),
-            border: `1px solid ${isSelected ? '#0083E0' : '#87A7C3'}`,
-            borderRadius: '4px',
-            marginBottom: '0.25rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease'
-          }}
         >
-          <FaTable style={{
-            color: isSelected ? 'white' : (isActualRoot ? '#003052' : isHopelineChild ? '#E56B38' : '#4C677F')
-          }} />
-          <div>
-            <div style={{
-              fontWeight: 'bold',
-              fontSize: '0.9rem',
-              color: isSelected ? 'white' : 'inherit'
-            }}>
+          <div className={`tree-node-indicator ${nodeType} ${isSelected ? 'selected' : ''}`} />
+
+          <FaTable className={`tree-node-icon ${nodeType} ${isSelected ? 'selected' : ''}`} />
+
+          <div className="tree-node-details">
+            <div className={`tree-node-label ${isSelected ? 'selected' : ''}`}>
               {node.label}
-              {isHopelineChild && !isSelected && <span style={{ fontSize: '0.7rem', color: '#E56B38', marginLeft: '0.5rem' }}>(hopeline)</span>}
+              {isHopelineChild && (
+                <span className="tree-node-badge hopeline">hopeline</span>
+              )}
             </div>
-            <div style={{
-              fontSize: '0.8rem',
-              color: isSelected ? 'rgba(255,255,255,0.8)' : '#4C677F'
-            }}>
+            <div className={`tree-node-subtitle ${isSelected ? 'selected' : ''}`}>
               {node.title} ({tableName})
             </div>
           </div>
         </div>
-        {node.children.map((child: any) => (
-          <TreeNode key={child.id} node={child} level={level + 1} />
-        ))}
+
+        {node.children.length > 0 && (
+          <div className="tree-children">
+            {node.children.map((child: any) => (
+              <TreeNode key={child.id} node={child} level={level + 1} />
+            ))}
+          </div>
+        )}
       </div>
     );
   };
@@ -267,43 +262,29 @@ export default function SchemaView({ onFieldSelect }: SchemaViewProps) {
           )}
         </div>
 
-      {/* TreeView Section */}
-      {state.treeStructure.length > 0 && (
-        <div style={{ marginBottom: '1rem' }}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              cursor: 'pointer',
-              marginBottom: '0.25rem'
-            }}
-            onClick={() => toggleSection('treeview')}
-          >
-            <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 'bold' }}>
-              <FaSitemap style={{ fontSize: '0.85rem' }} /> Table Structure
-            </h3>
-            <span style={{ fontSize: '0.8rem' }}>{expandedSections.treeview ? '▼' : '▶'}</span>
-          </div>
-
-          {expandedSections.treeview && (
-            <div style={{
-              border: '1px solid #DAE8F4',
-              borderRadius: '4px',
-              padding: '0.5rem',
-              backgroundColor: '#DAE8F4'
-            }}>
-              {state.treeStructure.map((rootNode, index) => (
-                <TreeNode
-                  key={rootNode.id}
-                  node={rootNode}
-                  isRootNode={state.hasRootTable && index === 0}
-                />
-              ))}
+        {/* TreeView Section */}
+        {state.treeStructure.length > 0 && (
+          <div className="tree-section">
+            <div className="tree-section-header" onClick={() => toggleSection('treeview')}>
+              <h3>
+                <FaSitemap /> Table Structure
+              </h3>
+              <span className="section-toggle">{expandedSections.treeview ? '▼' : '▶'}</span>
             </div>
-          )}
-        </div>
-      )}
+
+            {expandedSections.treeview && (
+              <div className="tree-container">
+                {state.treeStructure.map((rootNode, index) => (
+                  <TreeNode
+                    key={rootNode.id}
+                    node={rootNode}
+                    isRootNode={state.hasRootTable && index === 0}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
       </div>
     </div>

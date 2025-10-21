@@ -4,7 +4,7 @@ import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useApp } from '../context/AppContext';
-import { FaGripVertical, FaTimes, FaPlus, FaTable, FaWpforms, FaCog, FaEdit, FaChevronLeft, FaChevronRight, FaEye, FaFont, FaEnvelope, FaPhone, FaHashtag, FaCalendarAlt, FaCaretDown, FaAlignLeft, FaCheck, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { FaGripVertical, FaTimes, FaPlus, FaTable, FaWpforms, FaCog, FaEdit, FaChevronLeft, FaChevronRight, FaEye, FaFont, FaEnvelope, FaPhone, FaHashtag, FaCalendarAlt, FaCaretDown, FaAlignLeft, FaCheck, FaChevronDown, FaChevronUp, FaUsers, FaBuilding, FaClipboardList, FaFileAlt, FaProjectDiagram, FaDatabase, FaCube, FaLayerGroup } from 'react-icons/fa';
 import ActionView from './ActionView';
 
 interface Field {
@@ -77,14 +77,14 @@ function DraggableField({ field }: { field: Field }) {
       className="draggable-field"
     >
       <div style={{
-        padding: '0.75rem',
+        padding: '0.5rem',
         backgroundColor: 'white',
         border: '1px solid #DAE8F4',
         borderRadius: '4px',
-        marginBottom: '0.5rem',
+        marginBottom: '0.375rem',
         display: 'flex',
         alignItems: 'center',
-        gap: '0.5rem',
+        gap: '0.375rem',
         boxShadow: '0 1px 3px rgba(44,62,76,0.1)',
         transition: 'all 0.2s ease'
       }}>
@@ -455,6 +455,11 @@ export default function FormBuilderPanel({
     return rootNode.children || [];
   };
 
+  // Get consistent icon for all child table tabs
+  const getTableIcon = () => {
+    return <FaTable />;
+  };
+
   // Initialize active child tab
   useEffect(() => {
     const childTables = getChildTables();
@@ -784,7 +789,7 @@ export default function FormBuilderPanel({
             <>
               <div style={{
                 marginBottom: '1rem',
-                padding: '0.75rem',
+                padding: '0.5rem',
                 backgroundColor: '#A0D7FF',
                 borderRadius: '4px',
                 border: '1px solid #47B3FF'
@@ -1161,26 +1166,53 @@ export default function FormBuilderPanel({
                         {/* Tab Headers */}
                         <div style={{
                           display: 'flex',
-                          borderBottom: '2px solid #DAE8F4',
-                          marginBottom: '1rem'
+                          backgroundColor: '#f8fafc',
+                          borderRadius: '8px',
+                          padding: '4px',
+                          marginBottom: '1.5rem',
+                          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                          border: '1px solid #e2e8f0'
                         }}>
-                          {getChildTables().map((childTable) => (
+                          {getChildTables().map((childTable, index) => (
                             <button
                               key={childTable.tableId}
                               type="button"
                               onClick={() => setActiveChildTab(childTable.tableId)}
                               style={{
-                                padding: '1rem 1.5rem',
-                                backgroundColor: activeChildTab === childTable.tableId ? '#47B3FF' : 'transparent',
-                                color: activeChildTab === childTable.tableId ? 'white' : '#4C677F',
+                                flex: 1,
+                                padding: '0.75rem 1.5rem',
+                                backgroundColor: activeChildTab === childTable.tableId ? 'white' : 'transparent',
+                                color: activeChildTab === childTable.tableId ? '#1f2937' : '#6b7280',
                                 border: 'none',
-                                borderBottom: activeChildTab === childTable.tableId ? '3px solid #003052' : '3px solid transparent',
+                                borderRadius: '6px',
                                 cursor: 'pointer',
-                                fontSize: '1rem',
-                                fontWeight: activeChildTab === childTable.tableId ? 'bold' : 'normal',
-                                transition: 'all 0.2s ease'
+                                fontSize: '0.95rem',
+                                fontWeight: activeChildTab === childTable.tableId ? '600' : '500',
+                                transition: 'all 0.2s ease',
+                                position: 'relative',
+                                marginRight: index < getChildTables().length - 1 ? '2px' : '0',
+                                boxShadow: activeChildTab === childTable.tableId ? '0 2px 4px rgba(0, 0, 0, 0.1)' : 'none',
+                                transform: activeChildTab === childTable.tableId ? 'translateY(-1px)' : 'none',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'flex-start'
+                              }}
+                              onMouseEnter={(e) => {
+                                if (activeChildTab !== childTable.tableId) {
+                                  e.currentTarget.style.backgroundColor = '#e5e7eb';
+                                  e.currentTarget.style.color = '#374151';
+                                }
+                              }}
+                              onMouseLeave={(e) => {
+                                if (activeChildTab !== childTable.tableId) {
+                                  e.currentTarget.style.backgroundColor = 'transparent';
+                                  e.currentTarget.style.color = '#6b7280';
+                                }
                               }}
                             >
+                              <span style={{ marginRight: '0.5rem' }}>
+                                {getTableIcon()}
+                              </span>
                               {childTable.title}
                             </button>
                           ))}
@@ -1528,7 +1560,7 @@ export default function FormBuilderPanel({
       <DragOverlay>
         {activeField ? (
           <div style={{
-            padding: '0.75rem',
+            padding: '0.5rem',
             backgroundColor: 'white',
             border: '2px solid #47B3FF',
             borderRadius: '4px',
@@ -1536,7 +1568,7 @@ export default function FormBuilderPanel({
             transform: 'rotate(5deg)',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.5rem'
+            gap: '0.375rem'
           }}>
             <div style={{ color: '#47B3FF' }}>
               {getFieldIcon(activeField.type)}
