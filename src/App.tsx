@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import Navbar from './components/Navbar';
-import ConnectionModal from './modals/ConnectionModal';
-import TableSelectionView from './views/TableSelectionView';
-import FormBuilderView from './views/FormBuilderView';
+import ConnectionModal from './components/modals/ConnectionModal';
+import SchemaView from './components/SchemaView';
+import FormBuilderView from './components/FormBuilderView';
 import { fetchDatasets } from './services/api';
 import { sessionStorageUtils } from './utils/sessionStorage';
 import { FaRegSquareCaretRight, FaRegSquareCaretLeft } from 'react-icons/fa6';
@@ -121,19 +121,26 @@ function AppContent() {
           <>
             {/* Toggle icon for left panel */}
             {isLeftPanelVisible ? (
-              <FaRegSquareCaretLeft
-                onClick={() => setIsLeftPanelVisible(false)}
-                style={{
-                  position: 'absolute',
-                  top: '1rem',
-                  left: '0.5rem',
-                  zIndex: 100,
-                  cursor: 'pointer',
-                  color: '#0083E0',
-                  fontSize: '1.5rem'
-                }}
-                title="Hide panel"
-              />
+              <div style={{
+                position: 'absolute',
+                top: '1rem',
+                left: '0.5rem',
+                zIndex: 100,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                <FaRegSquareCaretLeft
+                  onClick={() => setIsLeftPanelVisible(false)}
+                  style={{
+                    cursor: 'pointer',
+                    color: '#0083E0',
+                    fontSize: '1.5rem'
+                  }}
+                  title="Hide panel"
+                />
+               
+              </div>
             ) : (
               <FaRegSquareCaretRight
                 onClick={() => setIsLeftPanelVisible(true)}
@@ -159,7 +166,7 @@ function AppContent() {
               transition: 'width 0.3s ease',
               overflow: 'hidden'
             }}>
-              {isLeftPanelVisible && <TableSelectionView onFieldSelect={handleFieldSelect} />}
+              {isLeftPanelVisible && <SchemaView onFieldSelect={handleFieldSelect} />}
             </div>
 
             <FormBuilderView

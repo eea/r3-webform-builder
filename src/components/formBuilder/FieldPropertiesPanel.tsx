@@ -1,6 +1,6 @@
 import { FaCog, FaEdit } from 'react-icons/fa';
 import type { FormField } from '../../types/formBuilder';
-import ActionView from '../../views/ActionView';
+import ActionView from '../ActionView';
 
 interface FieldPropertiesPanelProps {
   selectedFormField: FormField | null;

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { sessionStorageUtils } from '../utils/sessionStorage';
+import { sessionStorageUtils } from '../../utils/sessionStorage';
 
 interface ConnectionModalProps {
   isOpen: boolean;
