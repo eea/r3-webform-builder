@@ -54,9 +54,9 @@
 
 .webform-input {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
   background-color: white;
   color: #374151;
   font-size: 1rem;
@@ -79,9 +79,9 @@
 
 .dataset-dropdown {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
   background-color: white;
   color: #374151;
   font-size: 1rem;
@@ -115,9 +115,9 @@
 
 .tables-dropdown {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
   background-color: white;
   color: #374151;
   font-size: 1rem;
@@ -162,9 +162,9 @@
 
 .form-group input {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
   background-color: white;
   color: #374151;
   font-size: 1rem;

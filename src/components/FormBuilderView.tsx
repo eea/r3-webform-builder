@@ -292,9 +292,9 @@ function renderInteractiveField(field: FormField) {
   const baseStyle = {
     width: '100%',
     maxWidth: '100%',
-    padding: '0.75rem',
-    border: '2px solid #dee2e6',
-    borderRadius: '6px',
+    padding: '0.5rem',
+    border: '1px solid #ccc',
+    borderRadius: '4px',
     fontSize: '1rem',
     fontFamily: 'inherit',
     boxSizing: 'border-box' as const
@@ -320,7 +320,7 @@ function renderInteractiveField(field: FormField) {
           placeholder={placeholder}
           style={baseStyle}
           onFocus={(e) => Object.assign(e.target.style, focusStyle)}
-          onBlur={(e) => Object.assign(e.target.style, { borderColor: '#dee2e6', boxShadow: 'none' })}
+          onBlur={(e) => Object.assign(e.target.style, { borderColor: '#ccc', boxShadow: 'none' })}
         />
       );
     case 'number':
@@ -330,7 +330,7 @@ function renderInteractiveField(field: FormField) {
           placeholder={placeholder}
           style={baseStyle}
           onFocus={(e) => Object.assign(e.target.style, focusStyle)}
-          onBlur={(e) => Object.assign(e.target.style, { borderColor: '#dee2e6', boxShadow: 'none' })}
+          onBlur={(e) => Object.assign(e.target.style, { borderColor: '#ccc', boxShadow: 'none' })}
         />
       );
     case 'date':
@@ -339,7 +339,7 @@ function renderInteractiveField(field: FormField) {
           type="date"
           style={baseStyle}
           onFocus={(e) => Object.assign(e.target.style, focusStyle)}
-          onBlur={(e) => Object.assign(e.target.style, { borderColor: '#dee2e6', boxShadow: 'none' })}
+          onBlur={(e) => Object.assign(e.target.style, { borderColor: '#ccc', boxShadow: 'none' })}
         />
       );
     case 'select':
@@ -347,7 +347,7 @@ function renderInteractiveField(field: FormField) {
         <select
           style={baseStyle}
           onFocus={(e) => Object.assign(e.target.style, focusStyle)}
-          onBlur={(e) => Object.assign(e.target.style, { borderColor: '#dee2e6', boxShadow: 'none' })}
+          onBlur={(e) => Object.assign(e.target.style, { borderColor: '#ccc', boxShadow: 'none' })}
         >
           <option value="">Select {field.name.toLowerCase()}</option>
           <option value="option1">Option 1</option>
@@ -362,7 +362,7 @@ function renderInteractiveField(field: FormField) {
           rows={4}
           style={{ ...baseStyle, resize: 'vertical', minHeight: '100px', maxWidth: '100%' }}
           onFocus={(e) => Object.assign(e.target.style, focusStyle)}
-          onBlur={(e) => Object.assign(e.target.style, { borderColor: '#dee2e6', boxShadow: 'none' })}
+          onBlur={(e) => Object.assign(e.target.style, { borderColor: '#ccc', boxShadow: 'none' })}
         />
       );
     case 'checkbox':
@@ -393,7 +393,7 @@ function renderInteractiveField(field: FormField) {
           placeholder={placeholder}
           style={baseStyle}
           onFocus={(e) => Object.assign(e.target.style, focusStyle)}
-          onBlur={(e) => Object.assign(e.target.style, { borderColor: '#dee2e6', boxShadow: 'none' })}
+          onBlur={(e) => Object.assign(e.target.style, { borderColor: '#ccc', boxShadow: 'none' })}
         />
       );
   }
@@ -766,7 +766,7 @@ export default function FormBuilderPanel({
         {/* Column 1: Table Fields */}
         <div style={{
           width: '300px',
-          backgroundColor: 'white',
+          backgroundColor: '#f8f9fa',
           borderRight: '1px solid #dee2e6',
           padding: '1rem',
           overflow: 'auto'
@@ -849,8 +849,7 @@ export default function FormBuilderPanel({
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
-          padding: '1rem',
-          overflow: 'auto'
+          padding: '1rem'
         }}>
           {/* Header */}
           <div style={{
@@ -956,6 +955,7 @@ export default function FormBuilderPanel({
           </div>
 
           {/* Content Area */}
+          <div style={{ flex: 1, overflow: 'auto' }}>
           {showJSON ? (
             /* JSON View */
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
@@ -986,7 +986,8 @@ export default function FormBuilderPanel({
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                marginBottom: '1rem'
+                marginBottom: '1rem',
+                marginRight: '1rem'
               }}>
                 <h3 style={{ margin: 0, color: '#50B0A4' }}>Full Form Preview</h3>
                 <div style={{
@@ -1014,41 +1015,32 @@ export default function FormBuilderPanel({
                   </div>
                 </div>
               ) : (
-                <div style={{
-                  backgroundColor: 'white',
+                <form style={{
+                  maxWidth: '700px',
+                  background: 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%)',
                   padding: '2rem',
-                  borderRadius: '8px',
-                  border: '1px solid #DAE8F4',
-                  boxShadow: '0 2px 8px rgba(44,62,76,0.1)',
-                  overflow: 'auto'
+                  marginRight: '1rem',
+                  borderRadius: '12px',
+                  border: '1px solid #94a3b8',
+                  boxShadow: `
+                    0 20px 40px rgba(0, 0, 0, 0.15),
+                    0 10px 20px rgba(0, 0, 0, 0.1),
+                    0 4px 8px rgba(0, 0, 0, 0.05),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.3)
+                  `,
+                  position: 'relative'
                 }}>
-                  {/* Form Header */}
-                  <div style={{
-                    marginBottom: '2rem',
-                    paddingBottom: '1rem',
-                    borderBottom: '2px solid #DAE8F4'
-                  }}>
-                    <h2 style={{
-                      margin: 0,
-                      fontSize: '1.5rem',
-                      color: '#2E3E4C',
-                      fontWeight: 'bold'
-                    }}>
-                      {state.hasRootTable ? 'Complete Form' : 'Data Collection Form'}
-                    </h2>
-                    <p style={{
-                      margin: '0.5rem 0 0 0',
-                      color: '#4C677F',
-                      fontSize: '1rem'
-                    }}>
-                      Please fill out all required information
-                    </p>
-                  </div>
-
-                  <form style={{ maxWidth: '700px' }}>
                     {/* Root Table Section */}
                     {state.hasRootTable && state.treeStructure.length > 0 && (
                       <div style={{ marginBottom: '2rem' }}>
+                        <h3 style={{
+                          margin: '0 0 1rem 0',
+                          fontSize: '1.2rem',
+                          color: '#2E3E4C',
+                          fontWeight: 'bold'
+                        }}>
+                          Root table
+                        </h3>
                         <div
                           onClick={() => setIsRootCollapsed(!isRootCollapsed)}
                           style={{
@@ -1056,25 +1048,29 @@ export default function FormBuilderPanel({
                             alignItems: 'center',
                             justifyContent: 'space-between',
                             marginBottom: '1rem',
-                            padding: '1rem',
-                            backgroundColor: '#A0D7FF',
+                            padding: '0.75rem 1rem',
+                            backgroundColor: '#f8fafc',
                             borderRadius: '8px',
-                            border: '1px solid #47B3FF',
+                            border: '1px solid #e2e8f0',
+                            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
                             cursor: 'pointer',
                             transition: 'all 0.2s ease'
                           }}
                         >
-                          <h3 style={{
-                            margin: 0,
-                            fontSize: '1.2rem',
-                            color: '#003052',
-                            fontWeight: 'bold'
-                          }}>
-                            {state.treeStructure[0].title}
-                          </h3>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <FaTable style={{ color: '#1f2937', fontSize: '1rem' }} />
+                            <h3 style={{
+                              margin: 0,
+                              fontSize: '1rem',
+                              color: '#1f2937',
+                              fontWeight: 'bold'
+                            }}>
+                              {state.treeStructure[0].title}
+                            </h3>
+                          </div>
                           <div style={{
-                            color: '#003052',
-                            fontSize: '1.2rem',
+                            color: '#1f2937',
+                            fontSize: '1rem',
                             transition: 'transform 0.2s ease',
                             transform: isRootCollapsed ? 'rotate(0deg)' : 'rotate(180deg)'
                           }}>
@@ -1085,8 +1081,9 @@ export default function FormBuilderPanel({
                         {!isRootCollapsed && (
                           <div style={{
                             padding: '1rem',
-                            backgroundColor: '#DAE8F4',
+                            backgroundColor: '#EFEBF2',
                             borderRadius: '8px',
+                            border: '1px solid #BEADCE',
                             marginBottom: '1rem'
                           }}>
                             {getFieldsByTableId(state.treeStructure[0].tableId).map((field) => {
@@ -1099,7 +1096,7 @@ export default function FormBuilderPanel({
                                   marginBottom: '1.5rem',
                                   padding: field.isPrimary ? '1rem' : '0',
                                   backgroundColor: field.isPrimary ? 'white' : 'transparent',
-                                  border: field.isPrimary ? '2px solid #47B3FF' : 'none',
+                                  border: field.isPrimary ? '2px solid #9E84B6' : 'none',
                                   borderRadius: field.isPrimary ? '6px' : '0'
                                 }}>
                                   <label style={{
@@ -1117,7 +1114,7 @@ export default function FormBuilderPanel({
                                       <span style={{
                                         marginLeft: '0.5rem',
                                         fontSize: '0.8rem',
-                                        backgroundColor: '#47B3FF',
+                                        backgroundColor: '#9E84B6',
                                         color: 'white',
                                         padding: '0.2rem 0.5rem',
                                         borderRadius: '12px'
@@ -1160,7 +1157,7 @@ export default function FormBuilderPanel({
                           color: '#2E3E4C',
                           fontWeight: 'bold'
                         }}>
-                          Additional Information
+                          Tabs
                         </h3>
 
                         {/* Tab Headers */}
@@ -1299,8 +1296,7 @@ export default function FormBuilderPanel({
                       </div>
                     )}
 
-                  </form>
-                </div>
+                </form>
               )}
             </div>
           ) : (
@@ -1356,6 +1352,7 @@ export default function FormBuilderPanel({
               )}
             </DroppableFormArea>
           )}
+          </div>
         </div>
 
         {/* Column 3: Properties Panel */}
@@ -1413,7 +1410,7 @@ export default function FormBuilderPanel({
                   style={{
                     width: '100%',
                     padding: '0.5rem',
-                    border: '1px solid #87A7C3',
+                    border: '1px solid #ccc',
                     borderRadius: '4px',
                     fontSize: '0.9rem'
                   }}
@@ -1433,7 +1430,7 @@ export default function FormBuilderPanel({
                   style={{
                     width: '100%',
                     padding: '0.5rem',
-                    border: '1px solid #87A7C3',
+                    border: '1px solid #ccc',
                     borderRadius: '4px',
                     fontSize: '0.9rem',
                     resize: 'vertical'

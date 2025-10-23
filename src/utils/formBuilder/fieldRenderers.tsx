@@ -74,9 +74,9 @@ export function renderInteractiveField(field: FormField) {
   const baseStyle = {
     width: '100%',
     maxWidth: '100%',
-    padding: '0.75rem',
-    border: '2px solid #dee2e6',
-    borderRadius: '6px',
+    padding: '0.5rem',
+    border: '1px solid #ccc',
+    borderRadius: '4px',
     fontSize: '1rem',
     fontFamily: 'inherit',
     boxSizing: 'border-box' as const
@@ -102,7 +102,7 @@ export function renderInteractiveField(field: FormField) {
           placeholder={placeholder}
           style={baseStyle}
           onFocus={(e) => Object.assign(e.target.style, focusStyle)}
-          onBlur={(e) => Object.assign(e.target.style, { borderColor: '#dee2e6', boxShadow: 'none' })}
+          onBlur={(e) => Object.assign(e.target.style, { borderColor: '#ccc', boxShadow: 'none' })}
         />
       );
     case 'number':
@@ -112,7 +112,7 @@ export function renderInteractiveField(field: FormField) {
           placeholder={placeholder}
           style={baseStyle}
           onFocus={(e) => Object.assign(e.target.style, focusStyle)}
-          onBlur={(e) => Object.assign(e.target.style, { borderColor: '#dee2e6', boxShadow: 'none' })}
+          onBlur={(e) => Object.assign(e.target.style, { borderColor: '#ccc', boxShadow: 'none' })}
         />
       );
     case 'date':
@@ -121,7 +121,7 @@ export function renderInteractiveField(field: FormField) {
           type="date"
           style={baseStyle}
           onFocus={(e) => Object.assign(e.target.style, focusStyle)}
-          onBlur={(e) => Object.assign(e.target.style, { borderColor: '#dee2e6', boxShadow: 'none' })}
+          onBlur={(e) => Object.assign(e.target.style, { borderColor: '#ccc', boxShadow: 'none' })}
         />
       );
     case 'select':
@@ -129,7 +129,7 @@ export function renderInteractiveField(field: FormField) {
         <select
           style={baseStyle}
           onFocus={(e) => Object.assign(e.target.style, focusStyle)}
-          onBlur={(e) => Object.assign(e.target.style, { borderColor: '#dee2e6', boxShadow: 'none' })}
+          onBlur={(e) => Object.assign(e.target.style, { borderColor: '#ccc', boxShadow: 'none' })}
         >
           <option value="">Select {field.name.toLowerCase()}</option>
           <option value="option1">Option 1</option>
@@ -144,7 +144,7 @@ export function renderInteractiveField(field: FormField) {
           rows={4}
           style={{ ...baseStyle, resize: 'vertical', minHeight: '100px', maxWidth: '100%' }}
           onFocus={(e) => Object.assign(e.target.style, focusStyle)}
-          onBlur={(e) => Object.assign(e.target.style, { borderColor: '#dee2e6', boxShadow: 'none' })}
+          onBlur={(e) => Object.assign(e.target.style, { borderColor: '#ccc', boxShadow: 'none' })}
         />
       );
     case 'checkbox':
@@ -175,7 +175,7 @@ export function renderInteractiveField(field: FormField) {
           placeholder={placeholder}
           style={baseStyle}
           onFocus={(e) => Object.assign(e.target.style, focusStyle)}
-          onBlur={(e) => Object.assign(e.target.style, { borderColor: '#dee2e6', boxShadow: 'none' })}
+          onBlur={(e) => Object.assign(e.target.style, { borderColor: '#ccc', boxShadow: 'none' })}
         />
       );
   }

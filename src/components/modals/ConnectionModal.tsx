@@ -8,13 +8,16 @@ interface ConnectionModalProps {
     environment: string;
     apiKey: string;
     dataflowId: string;
+    webformName?: string;
   }) => void;
 }
 
 export default function ConnectionModal({ isOpen, onClose, onSubmit }: ConnectionModalProps) {
-  const [environment, setEnvironment] = useState('');
-  const [apiKey, setApiKey] = useState('');
-  const [dataflowId, setDataflowId] = useState('');
+  // TODO: Remove hardcoded default values before production
+  const [environment, setEnvironment] = useState('sandbox');
+  const [apiKey, setApiKey] = useState('2ad75cfa-7021-4332-9557-877cab580268');
+  const [dataflowId, setDataflowId] = useState('11734');
+  const [webformName, setWebformName] = useState('');
 
   // Load saved connection settings when modal opens
   useEffect(() => {
@@ -32,7 +35,7 @@ export default function ConnectionModal({ isOpen, onClose, onSubmit }: Connectio
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ environment, apiKey, dataflowId });
+    onSubmit({ environment, apiKey, dataflowId, webformName });
   };
 
   return (
@@ -60,7 +63,7 @@ export default function ConnectionModal({ isOpen, onClose, onSubmit }: Connectio
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '1rem' }}>
             <label style={{ display: 'block', marginBottom: '0.5rem' }}>
-              Environment:
+              Environment:<span style={{ color: '#B83230', marginLeft: '0.25rem' }}>*</span>
             </label>
             <select
               value={environment}
@@ -69,7 +72,8 @@ export default function ConnectionModal({ isOpen, onClose, onSubmit }: Connectio
                 width: '100%',
                 padding: '0.5rem',
                 border: '1px solid #ccc',
-                borderRadius: '4px'
+                borderRadius: '4px',
+                boxSizing: 'border-box'
               }}
               required
             >
@@ -82,7 +86,7 @@ export default function ConnectionModal({ isOpen, onClose, onSubmit }: Connectio
 
           <div style={{ marginBottom: '1rem' }}>
             <label style={{ display: 'block', marginBottom: '0.5rem' }}>
-              API Key:
+              API Key:<span style={{ color: '#B83230', marginLeft: '0.25rem' }}>*</span>
             </label>
             <input
               type="text"
@@ -92,15 +96,16 @@ export default function ConnectionModal({ isOpen, onClose, onSubmit }: Connectio
                 width: '100%',
                 padding: '0.5rem',
                 border: '1px solid #ccc',
-                borderRadius: '4px'
+                borderRadius: '4px',
+                boxSizing: 'border-box'
               }}
               required
             />
           </div>
 
-          <div style={{ marginBottom: '1.5rem' }}>
+          <div style={{ marginBottom: '1rem' }}>
             <label style={{ display: 'block', marginBottom: '0.5rem' }}>
-              Dataflow ID:
+              Dataflow ID:<span style={{ color: '#B83230', marginLeft: '0.25rem' }}>*</span>
             </label>
             <input
               type="text"
@@ -110,9 +115,29 @@ export default function ConnectionModal({ isOpen, onClose, onSubmit }: Connectio
                 width: '100%',
                 padding: '0.5rem',
                 border: '1px solid #ccc',
-                borderRadius: '4px'
+                borderRadius: '4px',
+                boxSizing: 'border-box'
               }}
               required
+            />
+          </div>
+
+          <div style={{ marginBottom: '1.5rem' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem' }}>
+              Webform Name:
+            </label>
+            <input
+              type="text"
+              value={webformName}
+              onChange={(e) => setWebformName(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '0.5rem',
+                border: '1px solid #ccc',
+                borderRadius: '4px',
+                boxSizing: 'border-box'
+              }}
+              placeholder="Enter webform name (optional)"
             />
           </div>
 

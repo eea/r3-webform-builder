@@ -16,7 +16,7 @@ interface SchemaViewProps {
 }
 
 export default function SchemaView({ onFieldSelect }: SchemaViewProps) {
-  const { state, setSelectedDataset, setSelectedTable, addRootTable, addTab, addRootTableToTree, addChildTableToTree, setSelectedTreeTable, setWebformName } = useApp();
+  const { state, setSelectedDataset, setSelectedTable, addRootTable, addTab, addRootTableToTree, addChildTableToTree, setSelectedTreeTable } = useApp();
   const [label, setLabel] = useState<string>('');
   const [title, setTitle] = useState<string>('');
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
@@ -156,23 +156,6 @@ export default function SchemaView({ onFieldSelect }: SchemaViewProps) {
             </p>
           )}
 
-          <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #e2e8f0' }}>
-            <div className="section-header">
-              <h3>
-                <FaWpforms style={{ fontSize: '0.85rem' }} /> Webform Name
-              </h3>
-            </div>
-            <input
-              type="text"
-              value={state.webformName}
-              onChange={(e) => setWebformName(e.target.value)}
-              className="webform-input"
-              placeholder="Enter webform name"
-            />
-            <p className="webform-description">
-              This name will be used for JSON download/upload
-            </p>
-          </div>
         </div>
 
         {/* Table Selection */}

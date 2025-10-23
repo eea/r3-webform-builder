@@ -19,7 +19,7 @@ interface FormField {
 }
 
 function AppContent() {
-  const { state, setConnection, setDatasets } = useApp();
+  const { state, setConnection, setDatasets, setWebformName } = useApp();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,6 +51,7 @@ function AppContent() {
     environment: string;
     apiKey: string;
     dataflowId: string;
+    webformName?: string;
   }) => {
     setIsLoading(true);
     setError(null);
@@ -59,6 +60,9 @@ function AppContent() {
       const datasets = await fetchDatasets(connectionData);
       setConnection(connectionData);
       setDatasets(datasets);
+      if (connectionData.webformName) {
+        setWebformName(connectionData.webformName);
+      }
       setIsModalOpen(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch datasets');
