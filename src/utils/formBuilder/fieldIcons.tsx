@@ -5,8 +5,12 @@ import {
   FaTable, FaEye, FaClock, FaLevelUpAlt
 } from 'react-icons/fa';
 
-export function getFieldIcon(fieldType: string) {
+export function getFieldIcon(fieldType: string | undefined) {
   const iconStyle = { fontSize: '1.1rem' };
+
+  if (!fieldType) {
+    return <FaFont style={iconStyle} />; // Default icon when fieldType is undefined
+  }
 
   switch (fieldType.toLowerCase()) {
     case 'text':
