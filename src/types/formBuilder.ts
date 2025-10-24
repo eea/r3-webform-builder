@@ -4,6 +4,12 @@ export interface Field {
   type: string;
   required: boolean;
   description?: string;
+  codelistItems?: string[];
+  level?: number;
+  readOnly?: boolean;
+  autoIncrement?: boolean;
+  isVisible?: boolean;
+  pk?: boolean;
 }
 
 export interface FormField extends Field {
@@ -14,6 +20,17 @@ export interface FormField extends Field {
   customPlaceholder?: string;
   customRequired?: boolean;
   isPrimary?: boolean;
+  customLevel?: number;
+  customReadOnly?: boolean;
+  customAutoIncrement?: boolean;
+  customIsVisible?: boolean;
+  customCodelistItems?: string[];
+  dependency?: {
+    field: string;
+    value: string[] | null;
+  };
+  referenceParentField?: string;
+  referenceParentTable?: string;
 }
 
 export interface FormBuilderViewProps {

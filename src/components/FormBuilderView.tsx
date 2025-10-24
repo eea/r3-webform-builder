@@ -1,403 +1,21 @@
 import { useState, useEffect } from 'react';
-import { DndContext, DragOverlay, useDraggable, useDroppable } from '@dnd-kit/core';
+import { DndContext, DragOverlay } from '@dnd-kit/core';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { useApp } from '../context/AppContext';
-import { FaGripVertical, FaTimes, FaPlus, FaTable, FaWpforms, FaCog, FaEdit, FaChevronLeft, FaChevronRight, FaEye, FaFont, FaEnvelope, FaPhone, FaHashtag, FaCalendarAlt, FaCaretDown, FaAlignLeft, FaCheck, FaChevronDown, FaChevronUp, FaUsers, FaBuilding, FaClipboardList, FaFileAlt, FaProjectDiagram, FaDatabase, FaCube, FaLayerGroup } from 'react-icons/fa';
+import { FaPlus, FaTable, FaWpforms, FaCog, FaChevronDown, FaEye } from 'react-icons/fa';
+import { getFieldIcon } from '../utils/formBuilder/fieldIcons';
+import { renderInteractiveField } from '../utils/formBuilder/fieldRenderers';
+import { generateFormJSON, importFormJSON } from '../utils/formBuilder/jsonHandlers';
 import ActionView from './ActionView';
+import DraggableField from './formBuilder/DraggableField';
+import SortableFormField from './formBuilder/SortableFormField';
+import DroppableFormArea from './formBuilder/DroppableFormArea';
+import PropertiesInspector from './formBuilder/PropertiesInspector';
 
-interface Field {
-  id: string;
-  name: string;
-  type: string;
-  required: boolean;
-  description?: string;
-}
+import type { Field, FormField, FormBuilderViewProps } from '../types/formBuilder';
 
-interface FormField extends Field {
-  formId: string;
-  tableId: string;
-  customTitle?: string;
-  customTooltip?: string;
-  customPlaceholder?: string;
-  customRequired?: boolean;
-  isPrimary?: boolean;
-}
 
-interface FormBuilderViewProps {
-  selectedFields: FormField[];
-  onRemoveField: (formId: string) => void;
-  onGenerateJSON: () => void;
-  onClearForm: () => void;
-}
-
-// Get icon for field type
-function getFieldIcon(fieldType: string) {
-  const iconStyle = { fontSize: '1.1rem' };
-
-  switch (fieldType) {
-    case 'text':
-      return <FaFont style={iconStyle} />;
-    case 'email':
-      return <FaEnvelope style={iconStyle} />;
-    case 'tel':
-      return <FaPhone style={iconStyle} />;
-    case 'number':
-      return <FaHashtag style={iconStyle} />;
-    case 'date':
-      return <FaCalendarAlt style={iconStyle} />;
-    case 'select':
-      return <FaCaretDown style={iconStyle} />;
-    case 'textarea':
-      return <FaAlignLeft style={iconStyle} />;
-    case 'checkbox':
-      return <FaCheck style={iconStyle} />;
-    default:
-      return <FaFont style={iconStyle} />;
-  }
-}
-
-// Draggable Field Component
-function DraggableField({ field }: { field: Field }) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-    id: field.id,
-    data: field,
-  });
-
-  return (
-    <div
-      ref={setNodeRef}
-      {...listeners}
-      {...attributes}
-      style={{
-        opacity: isDragging ? 0.5 : 1,
-        cursor: 'grab'
-      }}
-      className="draggable-field"
-    >
-      <div style={{
-        padding: '0.5rem',
-        backgroundColor: 'white',
-        border: '1px solid #DAE8F4',
-        borderRadius: '4px',
-        marginBottom: '0.375rem',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.375rem',
-        boxShadow: '0 1px 3px rgba(44,62,76,0.1)',
-        transition: 'all 0.2s ease'
-      }}>
-        <FaGripVertical style={{ color: '#4C677F', cursor: 'grab' }} />
-        <div style={{ color: '#47B3FF', marginRight: '0.5rem' }}>
-          {getFieldIcon(field.type)}
-        </div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 'bold', fontSize: '0.9rem', color: '#2E3E4C' }}>
-            {field.name}
-            {field.required && <span style={{ color: '#B83230', marginLeft: '0.25rem' }}>*</span>}
-          </div>
-          <div style={{ fontSize: '0.8rem', color: '#4C677F' }}>
-            {field.type}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Sortable Form Field Component
-function SortableFormField({
-  field,
-  onRemove,
-  isSelected,
-  onClick
-}: {
-  field: FormField;
-  onRemove: (formId: string) => void;
-  isSelected: boolean;
-  onClick: () => void;
-}) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: field.formId });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
-  return (
-    <div ref={setNodeRef} style={style}>
-      <div
-        onClick={onClick}
-        style={{
-          padding: '1rem',
-          backgroundColor: 'white',
-          border: `2px solid ${isSelected ? '#47B3FF' : '#DAE8F4'}`,
-          borderRadius: '4px',
-          marginBottom: '0.75rem',
-          boxShadow: isSelected ? '0 2px 8px rgba(71,179,255,0.3)' : '0 1px 3px rgba(44,62,76,0.1)',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease'
-        }}
-      >
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '0.5rem'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <FaGripVertical
-              {...attributes}
-              {...listeners}
-              style={{ color: '#4C677F', cursor: 'grab' }}
-              onClick={(e) => e.stopPropagation()}
-            />
-            <div style={{ color: '#47B3FF', marginRight: '0.25rem' }}>
-              {getFieldIcon(field.type)}
-            </div>
-            <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>
-              {field.name}
-              {field.required && <span style={{ color: '#B83230', marginLeft: '0.25rem' }}>*</span>}
-            </span>
-          </div>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onRemove(field.formId);
-            }}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#B83230',
-              cursor: 'pointer',
-              fontSize: '1rem',
-              padding: '0.25rem'
-            }}
-            title="Remove field"
-          >
-            <FaTimes />
-          </button>
-        </div>
-        <div style={{ fontSize: '0.8rem', color: '#4C677F' }}>
-          Type: {field.type} | {field.required ? 'Required' : 'Optional'}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Droppable Form Area
-function DroppableFormArea({ children }: { children: React.ReactNode }) {
-  const { isOver, setNodeRef } = useDroppable({
-    id: 'form-builder',
-  });
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={{
-        minHeight: '400px',
-        padding: '1rem',
-        backgroundColor: isOver ? '#DAE8F4' : 'transparent',
-        border: isOver ? '2px dashed #47B3FF' : '2px dashed transparent',
-        borderRadius: '8px',
-        transition: 'all 0.2s ease'
-      }}
-    >
-      {children}
-    </div>
-  );
-}
-
-// Render field preview
-function renderFieldPreview(field: FormField) {
-  const baseStyle = {
-    width: '100%',
-    padding: '0.5rem',
-    border: '1px solid #ccc',
-    borderRadius: '4px',
-    fontSize: '0.9rem'
-  };
-
-  switch (field.type) {
-    case 'text':
-    case 'email':
-    case 'tel':
-      return (
-        <input
-          type={field.type}
-          placeholder={`Enter ${field.name.toLowerCase()}`}
-          style={baseStyle}
-          disabled
-        />
-      );
-    case 'number':
-      return (
-        <input
-          type="number"
-          placeholder={`Enter ${field.name.toLowerCase()}`}
-          style={baseStyle}
-          disabled
-        />
-      );
-    case 'date':
-      return <input type="date" style={baseStyle} disabled />;
-    case 'select':
-      return (
-        <select style={baseStyle} disabled>
-          <option>Select {field.name.toLowerCase()}</option>
-          <option>Option 1</option>
-          <option>Option 2</option>
-        </select>
-      );
-    case 'textarea':
-      return (
-        <textarea
-          placeholder={`Enter ${field.name.toLowerCase()}`}
-          rows={3}
-          style={{ ...baseStyle, resize: 'vertical' }}
-          disabled
-        />
-      );
-    case 'checkbox':
-      return (
-        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <input type="checkbox" disabled />
-          <span>{field.name}</span>
-        </label>
-      );
-    default:
-      return (
-        <input
-          type="text"
-          placeholder={`Enter ${field.name.toLowerCase()}`}
-          style={baseStyle}
-          disabled
-        />
-      );
-  }
-}
-
-// Render interactive field for preview mode
-function renderInteractiveField(field: FormField) {
-  const baseStyle = {
-    width: '100%',
-    maxWidth: '100%',
-    padding: '0.5rem',
-    border: '1px solid #ccc',
-    borderRadius: '4px',
-    fontSize: '1rem',
-    fontFamily: 'inherit',
-    boxSizing: 'border-box' as const
-  };
-
-  const focusStyle = {
-    borderColor: '#47B3FF',
-    outline: 'none',
-    boxShadow: '0 0 0 3px rgba(71,179,255,0.1)'
-  };
-
-  const title = field.customTitle || field.name;
-  const placeholder = field.customPlaceholder || `Enter ${field.name.toLowerCase()}`;
-  const isRequired = field.customRequired !== undefined ? field.customRequired : field.required;
-
-  switch (field.type) {
-    case 'text':
-    case 'email':
-    case 'tel':
-      return (
-        <input
-          type={field.type}
-          placeholder={placeholder}
-          style={baseStyle}
-          onFocus={(e) => Object.assign(e.target.style, focusStyle)}
-          onBlur={(e) => Object.assign(e.target.style, { borderColor: '#ccc', boxShadow: 'none' })}
-        />
-      );
-    case 'number':
-      return (
-        <input
-          type="number"
-          placeholder={placeholder}
-          style={baseStyle}
-          onFocus={(e) => Object.assign(e.target.style, focusStyle)}
-          onBlur={(e) => Object.assign(e.target.style, { borderColor: '#ccc', boxShadow: 'none' })}
-        />
-      );
-    case 'date':
-      return (
-        <input
-          type="date"
-          style={baseStyle}
-          onFocus={(e) => Object.assign(e.target.style, focusStyle)}
-          onBlur={(e) => Object.assign(e.target.style, { borderColor: '#ccc', boxShadow: 'none' })}
-        />
-      );
-    case 'select':
-      return (
-        <select
-          style={baseStyle}
-          onFocus={(e) => Object.assign(e.target.style, focusStyle)}
-          onBlur={(e) => Object.assign(e.target.style, { borderColor: '#ccc', boxShadow: 'none' })}
-        >
-          <option value="">Select {field.name.toLowerCase()}</option>
-          <option value="option1">Option 1</option>
-          <option value="option2">Option 2</option>
-          <option value="option3">Option 3</option>
-        </select>
-      );
-    case 'textarea':
-      return (
-        <textarea
-          placeholder={placeholder}
-          rows={4}
-          style={{ ...baseStyle, resize: 'vertical', minHeight: '100px', maxWidth: '100%' }}
-          onFocus={(e) => Object.assign(e.target.style, focusStyle)}
-          onBlur={(e) => Object.assign(e.target.style, { borderColor: '#ccc', boxShadow: 'none' })}
-        />
-      );
-    case 'checkbox':
-      return (
-        <label style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.75rem',
-          cursor: 'pointer',
-          padding: '0.5rem 0'
-        }}>
-          <input
-            type="checkbox"
-            style={{
-              width: '18px',
-              height: '18px',
-              cursor: 'pointer',
-              accentColor: '#47B3FF'
-            }}
-          />
-          <span style={{ fontSize: '1rem' }}>{title}</span>
-        </label>
-      );
-    default:
-      return (
-        <input
-          type="text"
-          placeholder={placeholder}
-          style={baseStyle}
-          onFocus={(e) => Object.assign(e.target.style, focusStyle)}
-          onBlur={(e) => Object.assign(e.target.style, { borderColor: '#ccc', boxShadow: 'none' })}
-        />
-      );
-  }
-}
 
 export default function FormBuilderPanel({
   selectedFields,
@@ -520,113 +138,16 @@ export default function FormBuilderPanel({
     setActiveField(null);
   };
 
-  const generateFormJSON = () => {
-    // Generate form structure with webform name
-    const overview: any[] = [];
-
-    // Find root table and its fields for overview
-    let rootTableFields: FormField[] = [];
-
-    if (state.hasRootTable && state.treeStructure.length > 0) {
-      const rootNode = state.treeStructure[0];
-      rootTableFields = formFields.filter(f => f.tableId === rootNode.tableId);
-
-      // Add root table fields to overview
-      rootTableFields.forEach(field => {
-        overview.push({
-          field: field.name,
-          type: "FIELD",
-          header: field.name
-        });
-      });
-
-      // Add child table references to overview
-      rootNode.children.forEach((child: any) => {
-        overview.push({
-          field: child.label,
-          type: "TABLE",
-          header: child.title
-        });
-      });
-    } else {
-      // If no root table, just show all fields from current selection
-      const currentTableFields = formFields.filter(f => f.tableId === state.selectedTreeTable);
-      currentTableFields.forEach(field => {
-        overview.push({
-          field: field.name,
-          type: "FIELD",
-          header: field.name
-        });
-      });
-    }
-
-    // Generate tables section
-    const tables: any[] = [];
-
-    // Group fields by table
-    const fieldsByTable = new Map<string, FormField[]>();
-    formFields.forEach(field => {
-      if (!fieldsByTable.has(field.tableId)) {
-        fieldsByTable.set(field.tableId, []);
-      }
-      fieldsByTable.get(field.tableId)!.push(field);
-    });
-
-    // Process each table that has fields
-    const processedTables = new Set<string>();
-
-    if (state.treeStructure.length > 0) {
-      const processNode = (node: any, isRootTable: boolean = false) => {
-        if (!processedTables.has(node.tableId)) {
-          const selectedDataset = state.datasets.find(d => d.id === state.selectedDataset);
-          const tableData = selectedDataset?.tables.find(t => t.id === node.tableId);
-          const nodeFields = fieldsByTable.get(node.tableId) || [];
-
-          if (nodeFields.length > 0) {
-            const tableEntry = {
-              name: tableData?.name || node.tableId,
-              label: node.label,
-              title: node.title,
-              multipleRecords: false,
-              isVisible: !isRootTable,
-              ...(isRootTable && { isRootTable: true }),
-              elements: nodeFields.map(field => ({
-                type: "FIELD",
-                name: field.name,
-                title: "",
-                tooltip: "",
-                isPrimary: false,
-                showRequiredCharacter: field.required
-              }))
-            };
-
-            tables.push(tableEntry);
-            processedTables.add(node.tableId);
-          }
-        }
-
-        // Process children
-        node.children.forEach((child: any) => processNode(child, false));
-      };
-
-      // Process tree structure
-      state.treeStructure.forEach((rootNode, index) => {
-        if (state.hasRootTable && index === 0) {
-          processNode(rootNode, true);
-        } else {
-          processNode(rootNode, false);
-        }
-      });
-    }
-
-    const formStructure = {
-      webformName: state.webformName || 'Untitled Webform',
-      overview,
-      tables,
-      hideTabularData: false
-    };
-
-    return JSON.stringify(formStructure, null, 2);
+  const generateJSON = () => {
+    return generateFormJSON(
+      formFields,
+      state.webformName || 'Untitled Webform',
+      state.treeStructure,
+      state.hasRootTable,
+      state.selectedTreeTable,
+      state.datasets,
+      state.selectedDataset
+    );
   };
 
   const handleRemoveField = (formId: string) => {
@@ -663,7 +184,7 @@ export default function FormBuilderPanel({
 
   // Action handlers for ActionView
   const handleDownloadJSON = () => {
-    const jsonData = generateFormJSON();
+    const jsonData = generateJSON();
     const blob = new Blob([jsonData], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -686,65 +207,26 @@ export default function FormBuilderPanel({
 
   const handleUploadJSON = (jsonData: any) => {
     try {
-      // Validate the JSON structure
-      if (!jsonData || !jsonData.tables || !Array.isArray(jsonData.tables)) {
-        alert('Invalid JSON format. Expected a form configuration with tables array.');
-        return;
-      }
+      const result = importFormJSON(jsonData, state.datasets, state.selectedDataset);
 
       // Extract and set webform name if present
-      if (jsonData.webformName) {
-        setWebformName(jsonData.webformName);
+      if (result.webformName) {
+        setWebformName(result.webformName);
       }
 
       // Clear existing form state
       setFormFields([]);
       setSelectedFormField(null);
 
-      // Process tables from JSON and restore form fields
-      const restoredFields: FormField[] = [];
-      let firstTableId: string | null = null;
-
-      jsonData.tables.forEach((table: any, tableIndex: number) => {
-        if (table.elements && Array.isArray(table.elements)) {
-          table.elements.forEach((element: any, elementIndex: number) => {
-            if (element.type === 'FIELD') {
-              // Find the corresponding field in available datasets
-              const selectedDataset = state.datasets.find(d => d.id === state.selectedDataset);
-              const tableData = selectedDataset?.tables.find(t => t.name === table.name);
-              const fieldData = tableData?.fields.find(f => f.name === element.name);
-
-              if (fieldData && tableData) {
-                // Set the first table ID we encounter
-                if (firstTableId === null) {
-                  firstTableId = tableData.id;
-                }
-
-                const formField: FormField = {
-                  ...fieldData,
-                  formId: `restored_${tableData.id}_${fieldData.id}_${Date.now()}_${elementIndex}`,
-                  tableId: tableData.id,
-                  customTitle: element.title || fieldData.name,
-                  customTooltip: element.tooltip || fieldData.description,
-                  customRequired: element.showRequiredCharacter ?? fieldData.required,
-                  isPrimary: element.isPrimary || false
-                };
-                restoredFields.push(formField);
-              }
-            }
-          });
-        }
-      });
-
-      if (restoredFields.length > 0) {
-        setFormFields(restoredFields);
+      if (result.formFields.length > 0) {
+        setFormFields(result.formFields);
 
         // Automatically select the first table that has restored fields
-        if (firstTableId) {
-          setSelectedTreeTable(firstTableId);
+        if (result.firstTableId) {
+          setSelectedTreeTable(result.firstTableId);
         }
 
-        alert(`Successfully restored form with ${restoredFields.length} fields from JSON.`);
+        alert(`Successfully restored form with ${result.formFields.length} fields from JSON.`);
       } else {
         alert('No matching fields found in the current dataset. Please ensure you have the correct dataset selected.');
       }
@@ -976,7 +458,7 @@ export default function FormBuilderPanel({
                 flex: 1,
                 whiteSpace: 'pre-wrap'
               }}>
-                {generateFormJSON()}
+                {generateJSON()}
               </pre>
             </div>
           ) : showPreview ? (
@@ -1377,171 +859,10 @@ export default function FormBuilderPanel({
             </h3>
           </div>
 
-          {selectedFormField ? (
-            <div style={{ paddingRight: '1.5rem' }}>
-              {/* Field Info */}
-              <div style={{
-                marginBottom: '1.5rem',
-                padding: '0.5rem',
-                backgroundColor: '#DAE8F4',
-                borderRadius: '4px',
-                border: '1px solid #87A7C3',
-                marginRight:'-1rem'
-              }}>
-                <div style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '0.25rem' }}>
-                  {selectedFormField.name}
-                </div>
-                <div style={{ fontSize: '0.8rem', color: '#4C677F' }}>
-                  Type: {selectedFormField.type}
-                </div>
-              </div>
-
-              {/* Custom Title */}
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', fontSize: '0.9rem' }}>
-                  <FaEdit style={{ marginRight: '0.5rem', color: '#47B3FF' }} />
-                  Display Title
-                </label>
-                <input
-                  type="text"
-                  value={selectedFormField.customTitle || selectedFormField.name}
-                  onChange={(e) => handleUpdateFieldProperty(selectedFormField.formId, 'customTitle', e.target.value)}
-                  placeholder={selectedFormField.name}
-                  style={{
-                    width: '100%',
-                    padding: '0.5rem',
-                    border: '1px solid #ccc',
-                    borderRadius: '4px',
-                    fontSize: '0.9rem'
-                  }}
-                />
-              </div>
-
-              {/* Custom Tooltip */}
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', fontSize: '0.9rem' }}>
-                  Tooltip / Help Text
-                </label>
-                <textarea
-                  value={selectedFormField.customTooltip || ''}
-                  onChange={(e) => handleUpdateFieldProperty(selectedFormField.formId, 'customTooltip', e.target.value)}
-                  placeholder="Enter helpful text for users..."
-                  rows={3}
-                  style={{
-                    width: '100%',
-                    padding: '0.5rem',
-                    border: '1px solid #ccc',
-                    borderRadius: '4px',
-                    fontSize: '0.9rem',
-                    resize: 'vertical'
-                  }}
-                />
-              </div>
-
-              {/* Custom Placeholder */}
-              {['text', 'email', 'tel', 'number', 'textarea'].includes(selectedFormField.type) && (
-                <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', fontSize: '0.9rem' }}>
-                    Placeholder Text
-                  </label>
-                  <input
-                    type="text"
-                    value={selectedFormField.customPlaceholder || ''}
-                    onChange={(e) => handleUpdateFieldProperty(selectedFormField.formId, 'customPlaceholder', e.target.value)}
-                    placeholder={`Enter ${selectedFormField.name.toLowerCase()}`}
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem',
-                      border: '1px solid #ccc',
-                      borderRadius: '4px',
-                      fontSize: '0.9rem'
-                    }}
-                  />
-                </div>
-              )}
-
-              {/* Required Toggle */}
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  fontWeight: 'bold',
-                  fontSize: '0.9rem',
-                  cursor: 'pointer'
-                }}>
-                  <input
-                    type="checkbox"
-                    checked={selectedFormField.customRequired !== undefined ? selectedFormField.customRequired : selectedFormField.required}
-                    onChange={(e) => handleUpdateFieldProperty(selectedFormField.formId, 'customRequired', e.target.checked)}
-                    style={{ cursor: 'pointer' }}
-                  />
-                  Required Field
-                </label>
-              </div>
-
-              {/* Primary Field Toggle */}
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  fontWeight: 'bold',
-                  fontSize: '0.9rem',
-                  cursor: 'pointer'
-                }}>
-                  <input
-                    type="checkbox"
-                    checked={selectedFormField.isPrimary || false}
-                    onChange={(e) => handleUpdateFieldProperty(selectedFormField.formId, 'isPrimary', e.target.checked)}
-                    style={{ cursor: 'pointer' }}
-                  />
-                  Primary Field
-                </label>
-                <div style={{ fontSize: '0.8rem', color: '#4C677F', marginTop: '0.25rem', marginLeft: '1.5rem' }}>
-                  Primary fields are highlighted in the form
-                </div>
-              </div>
-
-              {/* Reset Button */}
-              <button
-                onClick={() => {
-                  handleUpdateFieldProperty(selectedFormField.formId, 'customTitle', undefined);
-                  handleUpdateFieldProperty(selectedFormField.formId, 'customTooltip', undefined);
-                  handleUpdateFieldProperty(selectedFormField.formId, 'customPlaceholder', undefined);
-                  handleUpdateFieldProperty(selectedFormField.formId, 'customRequired', undefined);
-                  handleUpdateFieldProperty(selectedFormField.formId, 'isPrimary', false);
-                }}
-                style={{
-                  width: '100%',
-                  padding: '0.5rem',
-                  backgroundColor: '#4C677F',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '0.9rem',
-                  marginTop: '1rem'
-                }}
-              >
-                Reset to Defaults
-              </button>
-            </div>
-          ) : (
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: '200px',
-              textAlign: 'center',
-              color: '#666'
-            }}>
-              <div>
-                <FaCog style={{ fontSize: '2rem', marginBottom: '1rem', color: '#ccc' }} />
-                <p>Select a field to edit its properties</p>
-              </div>
-            </div>
-          )}
+          <PropertiesInspector
+            selectedField={selectedFormField}
+            onUpdateField={handleUpdateFieldProperty}
+          />
 
           {/* Action View - Always visible */}
           <ActionView
