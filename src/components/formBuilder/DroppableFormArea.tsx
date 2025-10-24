@@ -1,5 +1,5 @@
 import { useDroppable } from '@dnd-kit/core';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 interface DroppableFormAreaProps {
   children: ReactNode;

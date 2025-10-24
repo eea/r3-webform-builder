@@ -1,3 +1,10 @@
+# Docker Image
+docker build -t r3-webform-builder:1.0.0 .
+
+remove
+docker rmi r3-webform-builder:1.0.0
+
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
