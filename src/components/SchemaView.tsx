@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { FaTable, FaLayerGroup, FaPlusCircle, FaFolder, FaSitemap, FaWpforms } from 'react-icons/fa';
+import { FaTable, FaLayerGroup, FaPlusCircle, FaSitemap } from 'react-icons/fa';
 import './SchemaView.css';
 
 interface Field {
@@ -17,7 +17,7 @@ interface SchemaViewProps {
 }
 
 export default function SchemaView({ onFieldSelect, onDatasetChange }: SchemaViewProps) {
-  const { state, setSelectedDataset, setSelectedTable, addRootTable, addTab, addRootTableToTree, addChildTableToTree, setSelectedTreeTable } = useApp();
+  const { state, setSelectedDataset, setSelectedTable, addRootTableToTree, addChildTableToTree, setSelectedTreeTable } = useApp();
   const [label, setLabel] = useState<string>('');
   const [title, setTitle] = useState<string>('');
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
@@ -40,6 +40,12 @@ export default function SchemaView({ onFieldSelect, onDatasetChange }: SchemaVie
 
   const selectedDatasetObj = state.datasets.find(d => d.id === state.selectedDataset);
   const availableTables = selectedDatasetObj?.tables || [];
+
+  // Filter out root tables when adding child tables
+  const filteredTables = state.hasRootTable
+    ? availableTables.filter(table => !state.rootTables.includes(table.id))
+    : availableTables;
+
   const selectedTableData = availableTables.find(t => t.id === state.selectedTable);
 
   const canEnableThirdButton = state.rootTables.length > 0 || state.tabs.length > 0;
@@ -55,6 +61,7 @@ export default function SchemaView({ onFieldSelect, onDatasetChange }: SchemaVie
       addRootTableToTree(state.selectedTable, label, title);
       setLabel('');
       setTitle('');
+      // Clear selection since the table is now a root table and cannot be selected again
       setSelectedTable('');
     }
   };
@@ -64,6 +71,7 @@ export default function SchemaView({ onFieldSelect, onDatasetChange }: SchemaVie
       addChildTableToTree(state.selectedTable, label, title);
       setLabel('');
       setTitle('');
+      // Clear selection after adding as child table
       setSelectedTable('');
     }
   };
@@ -177,7 +185,7 @@ export default function SchemaView({ onFieldSelect, onDatasetChange }: SchemaVie
             disabled={!state.selectedDataset}
           >
             <option value="">Select Table</option>
-            {availableTables.map((table) => (
+            {filteredTables.map((table) => (
               <option key={table.id} value={table.id}>
                 {table.name}
               </option>

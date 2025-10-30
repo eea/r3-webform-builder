@@ -915,7 +915,7 @@ export default function FormBuilderPanel({
             </div>
           ) : (
             /* Form Builder Area */
-            <DroppableFormArea>
+            <DroppableFormArea elementCount={currentTableFormFields.length}>
               {!state.selectedTreeTable ? (
                 <div style={{
                   display: 'flex',
