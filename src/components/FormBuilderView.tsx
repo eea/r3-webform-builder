@@ -3,7 +3,7 @@ import { DndContext, DragOverlay } from '@dnd-kit/core';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { SortableContext, horizontalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { useApp } from '../context/AppContext';
-import { FaPlus, FaTable, FaWpforms, FaCog, FaChevronDown, FaEye } from 'react-icons/fa';
+import { FaPlus, FaTable, FaWpforms, FaCog, FaChevronDown, FaEye, FaEdit } from 'react-icons/fa';
 import { getFieldIcon } from '../utils/formBuilder/fieldIcons';
 import { renderInteractiveField } from '../utils/formBuilder/fieldRenderers';
 import { generateFormJSON, importFormJSON } from '../utils/formBuilder/jsonHandlers';
@@ -24,7 +24,7 @@ export default function FormBuilderPanel({
   onGenerateJSON,
   onClearForm
 }: FormBuilderViewProps) {
-  const { state, setSelectedTreeTable, setWebformName } = useApp();
+  const { state, setSelectedTreeTable, setWebformName, updateTableProperties } = useApp();
   const [showJSON, setShowJSON] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [activeField, setActiveField] = useState<Field | null>(null);
@@ -32,6 +32,9 @@ export default function FormBuilderPanel({
   const [selectedFormField, setSelectedFormField] = useState<FormField | null>(null);
   const [isRootCollapsed, setIsRootCollapsed] = useState(false);
   const [activeChildTab, setActiveChildTab] = useState<string>('');
+  const [editingTableProperties, setEditingTableProperties] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [editLabel, setEditLabel] = useState('');
 
   // Get the selected table's fields
   const getSelectedTableFields = (): Field[] => {
@@ -948,9 +951,181 @@ export default function FormBuilderPanel({
                 </div>
               ) : (
                 <div>
-                  <h3 style={{ marginTop: 0, marginBottom: '1.5rem', color: '#333' }}>
-                    {selectedTableName} Form ({currentTableFormFields.length} fields)
+                  <h3 style={{ marginTop: 0, marginBottom: '1rem', color: '#333' }}>
+                    {selectedTableName} Form
                   </h3>
+                  {/* Gray line separator with edit icon */}
+                  {(() => {
+                    // Find the current table in tree structure
+                    const findTableInTree = (nodes: any[]): any => {
+                      for (const node of nodes) {
+                        if (node.tableId === state.selectedTreeTable) {
+                          return node;
+                        }
+                        if (node.children && node.children.length > 0) {
+                          const found = findTableInTree(node.children);
+                          if (found) return found;
+                        }
+                      }
+                      return null;
+                    };
+
+                    const currentTableNode = findTableInTree(state.treeStructure);
+
+                    if (currentTableNode) {
+                      const handleStartEdit = () => {
+                        setEditTitle(currentTableNode.title);
+                        setEditLabel(currentTableNode.label);
+                        setEditingTableProperties(true);
+                      };
+
+                      const handleSaveEdit = () => {
+                        if (editTitle.trim() && editLabel.trim()) {
+                          updateTableProperties(state.selectedTreeTable, editLabel.trim(), editTitle.trim());
+                          setEditingTableProperties(false);
+                        }
+                      };
+
+                      const handleCancelEdit = () => {
+                        setEditingTableProperties(false);
+                        setEditTitle('');
+                        setEditLabel('');
+                      };
+
+                      return (
+                        <>
+                          {/* Gray line with edit icon */}
+                          <div style={{
+                            position: 'relative',
+                            height: '1px',
+                            backgroundColor: '#dee2e6',
+                            marginBottom: '1rem'
+                          }}>
+                            <div style={{
+                              position: 'absolute',
+                              right: '0',
+                              top: '0.5rem',
+                              transform: 'translateY(-50%)'
+                            }}>
+                              <FaEdit
+                                onClick={handleStartEdit}
+                                style={{
+                                  color: '#47B3FF',
+                                  cursor: 'pointer',
+                                  fontSize: '1rem',
+                                  padding: '0.25rem',
+                                  borderRadius: '3px',
+                                  transition: 'all 0.2s ease'
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.backgroundColor = '#f0f8ff';
+                                  e.currentTarget.style.color = '#0066cc';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.backgroundColor = 'transparent';
+                                  e.currentTarget.style.color = '#47B3FF';
+                                }}
+                                title="Edit table title and label"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Table title and label display/edit */}
+                          <div style={{ marginBottom: '1.5rem' }}>
+                            {editingTableProperties ? (
+                              // Edit mode
+                              <div>
+                                <div style={{ marginBottom: '0.75rem' }}>
+                                  <strong style={{ color: '#4C677F', display: 'block', marginBottom: '0.25rem' }}>Title:</strong>
+                                  <input
+                                    type="text"
+                                    value={editTitle}
+                                    onChange={(e) => setEditTitle(e.target.value)}
+                                    style={{
+                                      width: '100%',
+                                      padding: '0.5rem',
+                                      border: '1px solid #dee2e6',
+                                      borderRadius: '4px',
+                                      fontSize: '0.9rem'
+                                    }}
+                                    placeholder="Enter title"
+                                  />
+                                </div>
+                                <div style={{ marginBottom: '0.75rem' }}>
+                                  <strong style={{ color: '#4C677F', display: 'block', marginBottom: '0.25rem' }}>Label:</strong>
+                                  <input
+                                    type="text"
+                                    value={editLabel}
+                                    onChange={(e) => setEditLabel(e.target.value)}
+                                    style={{
+                                      width: '100%',
+                                      padding: '0.5rem',
+                                      border: '1px solid #dee2e6',
+                                      borderRadius: '4px',
+                                      fontSize: '0.9rem'
+                                    }}
+                                    placeholder="Enter label"
+                                  />
+                                </div>
+                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                  <button
+                                    onClick={handleSaveEdit}
+                                    disabled={!editTitle.trim() || !editLabel.trim()}
+                                    style={{
+                                      padding: '0.4rem 0.8rem',
+                                      backgroundColor: (!editTitle.trim() || !editLabel.trim()) ? '#ccc' : '#289588',
+                                      color: 'white',
+                                      border: 'none',
+                                      borderRadius: '4px',
+                                      cursor: (!editTitle.trim() || !editLabel.trim()) ? 'not-allowed' : 'pointer',
+                                      fontSize: '0.8rem'
+                                    }}
+                                  >
+                                    Save
+                                  </button>
+                                  <button
+                                    onClick={handleCancelEdit}
+                                    style={{
+                                      padding: '0.4rem 0.8rem',
+                                      backgroundColor: '#6c757d',
+                                      color: 'white',
+                                      border: 'none',
+                                      borderRadius: '4px',
+                                      cursor: 'pointer',
+                                      fontSize: '0.8rem'
+                                    }}
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              // Display mode
+                              <div>
+                                <div style={{ marginBottom: '0.5rem' }}>
+                                  <strong style={{ color: '#4C677F' }}>Title:</strong>
+                                  <span style={{ marginLeft: '0.5rem', color: '#333' }}>{currentTableNode.title}</span>
+                                </div>
+                                <div style={{ marginBottom: '0.5rem' }}>
+                                  <strong style={{ color: '#4C677F' }}>Label:</strong>
+                                  <span style={{ marginLeft: '0.5rem', color: '#333' }}>{currentTableNode.label}</span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </>
+                      );
+                    }
+
+                    // If no table found, just show the gray line
+                    return (
+                      <div style={{
+                        height: '1px',
+                        backgroundColor: '#dee2e6',
+                        marginBottom: '1rem'
+                      }} />
+                    );
+                  })()}
                   {(() => {
                     const fieldsByBlocks = getCurrentTableFieldsByBlocks();
                     const blockIds = Object.keys(fieldsByBlocks).map(Number).sort((a, b) => a - b);

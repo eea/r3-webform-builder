@@ -61,6 +61,7 @@ interface AppContextType {
   addChildTableToTree: (tableId: string, label: string, title: string) => void;
   setSelectedTreeTable: (tableId: string) => void;
   setWebformName: (name: string) => void;
+  updateTableProperties: (tableId: string, label: string, title: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -220,6 +221,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  const updateTableProperties = (tableId: string, label: string, title: string) => {
+    const updateNodeRecursively = (nodes: TreeNode[]): TreeNode[] => {
+      return nodes.map(node => {
+        if (node.tableId === tableId) {
+          return { ...node, label, title };
+        }
+        if (node.children.length > 0) {
+          return { ...node, children: updateNodeRecursively(node.children) };
+        }
+        return node;
+      });
+    };
+
+    setState(prev => ({
+      ...prev,
+      treeStructure: updateNodeRecursively(prev.treeStructure)
+    }));
+  };
+
   return (
     <AppContext.Provider value={{
       state,
@@ -232,7 +252,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       addRootTableToTree,
       addChildTableToTree,
       setSelectedTreeTable,
-      setWebformName
+      setWebformName,
+      updateTableProperties
     }}>
       {children}
     </AppContext.Provider>
