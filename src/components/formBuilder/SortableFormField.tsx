@@ -24,7 +24,10 @@ export default function SortableFormField({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: field.formId });
+  } = useSortable({
+    id: field.formId,
+    data: { formId: field.formId, blockId: field.blockId }
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),

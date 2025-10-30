@@ -15,6 +15,7 @@ export interface Field {
 export interface FormField extends Field {
   formId: string;
   tableId: string;
+  blockId: number; // Block ID for horizontal grouping (1, 2, 3, etc.)
   customTitle?: string;
   customTooltip?: string;
   customPlaceholder?: string;

@@ -1,5 +1,44 @@
 import type { FormField } from '../../types/formBuilder';
 
+// Helper function to add field-specific properties
+function addFieldProperties(element: any, field: FormField) {
+  // Add placeholder for applicable field types
+  if (['text', 'email', 'tel', 'phone', 'number', 'number_integer', 'number_decimal', 'textarea'].includes(field.type.toLowerCase())) {
+    element.placeholder = field.customPlaceholder || `Enter ${field.name.toLowerCase()}`;
+  }
+
+  // Add level for label fields
+  if (field.type.toLowerCase() === 'label') {
+    element.level = field.customLevel || field.level || 1;
+  }
+
+  // Add auto increment for number fields
+  if (['number', 'number_integer'].includes(field.type.toLowerCase())) {
+    element.autoIncrement = field.customAutoIncrement !== undefined ? field.customAutoIncrement : (field.autoIncrement || false);
+  }
+
+  // Add codelist items for dropdown/multiselect fields
+  if (['codelist', 'multiselect_codelist'].includes(field.type.toLowerCase())) {
+    element.codelistItems = field.customCodelistItems || field.codelistItems || ['Option 1', 'Option 2', 'Option 3'];
+  }
+
+  // Add dependency information if present
+  if (field.dependency) {
+    element.dependency = {
+      field: field.dependency.field,
+      value: field.dependency.value
+    };
+  }
+
+  // Add reference information if present
+  if (field.referenceParentField) {
+    element.referenceParentField = field.referenceParentField;
+  }
+  if (field.referenceParentTable) {
+    element.referenceParentTable = field.referenceParentTable;
+  }
+}
+
 export interface FormStructure {
   version: string;
   generatedBy: string;
@@ -35,15 +74,43 @@ export function generateFormJSON(
     const rootNode = treeStructure[0];
     rootTableFields = formFields.filter(f => f.tableId === rootNode.tableId);
 
-    // Add root table fields to overview
+    // Add root table fields to overview (grouped by blocks)
+    const fieldsByBlock: Record<number, FormField[]> = {};
     rootTableFields.forEach(field => {
-      overview.push({
-        field: field.name,
-        type: "FIELD",
-        fieldType: field.type,
-        header: field.customTitle || field.name,
-        isPrimary: field.isPrimary || false
-      });
+      const blockId = field.blockId || 1;
+      if (!fieldsByBlock[blockId]) {
+        fieldsByBlock[blockId] = [];
+      }
+      fieldsByBlock[blockId].push(field);
+    });
+
+    const sortedBlockIds = Object.keys(fieldsByBlock).map(Number).sort((a, b) => a - b);
+    sortedBlockIds.forEach(blockId => {
+      const blockFields = fieldsByBlock[blockId];
+
+      if (blockFields.length === 1) {
+        // Single field - add directly
+        const field = blockFields[0];
+        overview.push({
+          field: field.name,
+          type: "FIELD",
+          fieldType: field.type,
+          header: field.customTitle || field.name,
+          isPrimary: field.isPrimary || false
+        });
+      } else if (blockFields.length > 1) {
+        // Multiple fields - add as block
+        overview.push({
+          type: "BLOCK",
+          elements: blockFields.map(field => ({
+            field: field.name,
+            type: "FIELD",
+            fieldType: field.type,
+            header: field.customTitle || field.name,
+            isPrimary: field.isPrimary || false
+          }))
+        });
+      }
     });
 
     // Add child table references to overview
@@ -98,57 +165,69 @@ export function generateFormJSON(
             multipleRecords: false,
             isVisible: !isRootTable,
             ...(isRootTable && { isRootTable: true }),
-            elements: nodeFields.map(field => {
-              const element: any = {
-                type: "FIELD",
-                name: field.name,
-                fieldType: field.type,
-                title: field.customTitle || field.name,
-                tooltip: field.customTooltip || field.description || "",
-                isPrimary: field.isPrimary || false,
-                showRequiredCharacter: field.customRequired !== undefined ? field.customRequired : field.required,
-                isVisible: field.customIsVisible !== undefined ? field.customIsVisible : (field.isVisible !== false),
-                readOnly: field.customReadOnly !== undefined ? field.customReadOnly : (field.readOnly || false)
-              };
+            elements: (() => {
+              // Group fields by blockId
+              const fieldsByBlock: Record<number, FormField[]> = {};
+              nodeFields.forEach(field => {
+                const blockId = field.blockId || 1;
+                if (!fieldsByBlock[blockId]) {
+                  fieldsByBlock[blockId] = [];
+                }
+                fieldsByBlock[blockId].push(field);
+              });
 
-              // Add placeholder for applicable field types
-              if (['text', 'email', 'tel', 'phone', 'number', 'number_integer', 'number_decimal', 'textarea'].includes(field.type.toLowerCase())) {
-                element.placeholder = field.customPlaceholder || `Enter ${field.name.toLowerCase()}`;
-              }
+              const elements: any[] = [];
+              const sortedBlockIds = Object.keys(fieldsByBlock).map(Number).sort((a, b) => a - b);
 
-              // Add level for label fields
-              if (field.type.toLowerCase() === 'label') {
-                element.level = field.customLevel || field.level || 1;
-              }
+              sortedBlockIds.forEach(blockId => {
+                const blockFields = fieldsByBlock[blockId];
 
-              // Add auto increment for number fields
-              if (['number', 'number_integer'].includes(field.type.toLowerCase())) {
-                element.autoIncrement = field.customAutoIncrement !== undefined ? field.customAutoIncrement : (field.autoIncrement || false);
-              }
+                if (blockFields.length === 1) {
+                  // Single field - add directly without block wrapper
+                  const field = blockFields[0];
+                  const element: any = {
+                    type: "FIELD",
+                    name: field.name,
+                    fieldType: field.type,
+                    title: field.customTitle || field.name,
+                    tooltip: field.customTooltip || field.description || "",
+                    isPrimary: field.isPrimary || false,
+                    showRequiredCharacter: field.customRequired !== undefined ? field.customRequired : field.required,
+                    isVisible: field.customIsVisible !== undefined ? field.customIsVisible : (field.isVisible !== false),
+                    readOnly: field.customReadOnly !== undefined ? field.customReadOnly : (field.readOnly || false)
+                  };
 
-              // Add codelist items for dropdown/multiselect fields
-              if (['codelist', 'multiselect_codelist'].includes(field.type.toLowerCase())) {
-                element.codelistItems = field.customCodelistItems || field.codelistItems || ['Option 1', 'Option 2', 'Option 3'];
-              }
+                  // Add field-specific properties
+                  addFieldProperties(element, field);
+                  elements.push(element);
+                } else if (blockFields.length > 1) {
+                  // Multiple fields - wrap in block
+                  const blockElement = {
+                    type: "BLOCK",
+                    elements: blockFields.map(field => {
+                      const element: any = {
+                        type: "FIELD",
+                        name: field.name,
+                        fieldType: field.type,
+                        title: field.customTitle || field.name,
+                        tooltip: field.customTooltip || field.description || "",
+                        isPrimary: field.isPrimary || false,
+                        showRequiredCharacter: field.customRequired !== undefined ? field.customRequired : field.required,
+                        isVisible: field.customIsVisible !== undefined ? field.customIsVisible : (field.isVisible !== false),
+                        readOnly: field.customReadOnly !== undefined ? field.customReadOnly : (field.readOnly || false)
+                      };
 
-              // Add dependency information if present
-              if (field.dependency) {
-                element.dependency = {
-                  field: field.dependency.field,
-                  value: field.dependency.value
-                };
-              }
+                      // Add field-specific properties
+                      addFieldProperties(element, field);
+                      return element;
+                    })
+                  };
+                  elements.push(blockElement);
+                }
+              });
 
-              // Add reference information if present
-              if (field.referenceParentField) {
-                element.referenceParentField = field.referenceParentField;
-              }
-              if (field.referenceParentTable) {
-                element.referenceParentTable = field.referenceParentTable;
-              }
-
-              return element;
-            })
+              return elements;
+            })()
           };
 
           tables.push(tableEntry);

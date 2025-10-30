@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { DndContext, DragOverlay } from '@dnd-kit/core';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
+import { SortableContext, horizontalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { useApp } from '../context/AppContext';
 import { FaPlus, FaTable, FaWpforms, FaCog, FaChevronDown, FaEye } from 'react-icons/fa';
 import { getFieldIcon } from '../utils/formBuilder/fieldIcons';
@@ -12,6 +12,7 @@ import DraggableField from './formBuilder/DraggableField';
 import SortableFormField from './formBuilder/SortableFormField';
 import DroppableFormArea from './formBuilder/DroppableFormArea';
 import PropertiesInspector from './formBuilder/PropertiesInspector';
+import FormBlock from './formBuilder/FormBlock';
 
 import type { Field, FormField, FormBuilderViewProps } from '../types/formBuilder';
 
@@ -61,6 +62,193 @@ export default function FormBuilderPanel({
 
   const currentTableFormFields = getCurrentTableFormFields();
 
+  // Group fields by blockId for the current table
+  const getCurrentTableFieldsByBlocks = (): Record<number, FormField[]> => {
+    const blocks: Record<number, FormField[]> = {};
+    currentTableFormFields.forEach(field => {
+      if (!blocks[field.blockId]) {
+        blocks[field.blockId] = [];
+      }
+      blocks[field.blockId].push(field);
+    });
+    return blocks;
+  };
+
+  // Get next available block ID
+  const getNextBlockId = (): number => {
+    const blockIds = currentTableFormFields.map(f => f.blockId);
+    return blockIds.length === 0 ? 1 : Math.max(...blockIds) + 1;
+  };
+
+  // Helper function to render fields grouped by blocks for preview
+  const renderFieldsByBlocks = (fields: FormField[]) => {
+    // Group fields by blockId
+    const fieldsByBlock: Record<number, FormField[]> = {};
+    fields.forEach(field => {
+      const blockId = field.blockId || 1;
+      if (!fieldsByBlock[blockId]) {
+        fieldsByBlock[blockId] = [];
+      }
+      fieldsByBlock[blockId].push(field);
+    });
+
+    const sortedBlockIds = Object.keys(fieldsByBlock).map(Number).sort((a, b) => a - b);
+
+    return sortedBlockIds.map(blockId => {
+      const blockFields = fieldsByBlock[blockId];
+
+      if (blockFields.length === 1) {
+        // Single field - render normally
+        const field = blockFields[0];
+        const title = field.customTitle || field.name;
+        const isRequired = field.customRequired !== undefined ? field.customRequired : field.required;
+        const tooltip = field.customTooltip;
+
+        return (
+          <div key={field.formId} style={{
+            marginBottom: '1rem',
+            padding: field.isPrimary ? '0.75rem' : '0',
+            backgroundColor: field.isPrimary ? 'white' : 'transparent',
+            border: field.isPrimary ? '2px solid #9E84B6' : 'none',
+            borderRadius: field.isPrimary ? '6px' : '0'
+          }}>
+            <label style={{
+              display: 'block',
+              marginBottom: '0.25rem',
+              fontSize: '0.9rem',
+              fontWeight: field.isPrimary ? 'bold' : '600',
+              color: field.isPrimary ? '#5C3285' : '#2E3E4C'
+            }}>
+              {title}
+              {isRequired && (
+                <span style={{ color: '#B83230', marginLeft: '0.25rem' }}>*</span>
+              )}
+              {field.isPrimary && (
+                <span style={{
+                  marginLeft: '0.5rem',
+                  fontSize: '0.7rem',
+                  backgroundColor: '#9E84B6',
+                  color: 'white',
+                  padding: '0.15rem 0.4rem',
+                  borderRadius: '10px'
+                }}>
+                  Primary
+                </span>
+              )}
+            </label>
+
+            {tooltip && (
+              <div style={{
+                marginBottom: '0.25rem',
+                fontSize: '0.8rem',
+                color: '#4C677F',
+                fontStyle: 'italic'
+              }}>
+                {tooltip}
+              </div>
+            )}
+
+            {field.type !== 'checkbox' ? renderInteractiveField(field) : (
+              <div style={{ marginTop: '0.25rem' }}>
+                {renderInteractiveField(field)}
+              </div>
+            )}
+          </div>
+        );
+      } else {
+        // Multiple fields - render as horizontal block (table row)
+        const fieldCount = blockFields.length;
+        // Calculate responsive sizes based on field count
+        const getResponsiveStyles = (count: number) => {
+          if (count === 2) return { gap: '0.75rem', minWidth: '180px' };
+          if (count === 3) return { gap: '0.5rem', minWidth: '150px' };
+          if (count >= 4) return { gap: '0.4rem', minWidth: '120px' };
+          return { gap: '1rem', minWidth: '200px' };
+        };
+
+        const { gap, minWidth } = getResponsiveStyles(fieldCount);
+
+        return (
+          <div key={`block-${blockId}`} style={{
+            display: 'flex',
+            gap: gap,
+            marginBottom: '1rem',
+            padding: '0.75rem',
+            backgroundColor: '#f8fafc',
+            borderRadius: '6px',
+            border: '1px solid #e2e8f0'
+          }}>
+            {blockFields.map((field) => {
+              const title = field.customTitle || field.name;
+              const isRequired = field.customRequired !== undefined ? field.customRequired : field.required;
+              const tooltip = field.customTooltip;
+
+              return (
+                <div key={field.formId} style={{
+                  flex: '1 1 0',
+                  minWidth: minWidth,
+                  maxWidth: fieldCount >= 4 ? '200px' : 'none',
+                  padding: field.isPrimary ? '0.5rem' : '0.25rem',
+                  backgroundColor: field.isPrimary ? 'white' : 'transparent',
+                  border: field.isPrimary ? '2px solid #9E84B6' : 'none',
+                  borderRadius: field.isPrimary ? '4px' : '0'
+                }}>
+                  <label style={{
+                    display: 'block',
+                    marginBottom: '0.25rem',
+                    fontSize: fieldCount >= 4 ? '0.8rem' : '0.9rem',
+                    fontWeight: field.isPrimary ? 'bold' : '600',
+                    color: field.isPrimary ? '#5C3285' : '#2E3E4C',
+                    lineHeight: '1.2'
+                  }}>
+                    {title}
+                    {isRequired && (
+                      <span style={{ color: '#B83230', marginLeft: '0.2rem' }}>*</span>
+                    )}
+                    {field.isPrimary && (
+                      <span style={{
+                        marginLeft: '0.3rem',
+                        fontSize: fieldCount >= 4 ? '0.6rem' : '0.7rem',
+                        backgroundColor: '#9E84B6',
+                        color: 'white',
+                        padding: '0.1rem 0.3rem',
+                        borderRadius: '8px'
+                      }}>
+                        Primary
+                      </span>
+                    )}
+                  </label>
+
+                  {tooltip && (
+                    <div style={{
+                      marginBottom: '0.25rem',
+                      fontSize: fieldCount >= 4 ? '0.7rem' : '0.8rem',
+                      color: '#4C677F',
+                      fontStyle: 'italic',
+                      lineHeight: '1.2'
+                    }}>
+                      {tooltip}
+                    </div>
+                  )}
+
+                  <div style={{
+                    fontSize: fieldCount >= 4 ? '0.8rem' : '0.9rem'
+                  }}>
+                    {field.type !== 'checkbox' ? renderInteractiveField(field) : (
+                      <div style={{ marginTop: '0.25rem' }}>
+                        {renderInteractiveField(field)}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        );
+      }
+    });
+  };
+
   // Get fields by table ID
   const getFieldsByTableId = (tableId: string): FormField[] => {
     return formFields.filter(f => f.tableId === tableId);
@@ -86,6 +274,15 @@ export default function FormBuilderPanel({
     }
   }, [state.treeStructure, activeChildTab]);
 
+  // Fix existing fields without blockId
+  useEffect(() => {
+    setFormFields(prev => prev.map(field =>
+      field.blockId === undefined || field.blockId === null
+        ? { ...field, blockId: 1 }
+        : field
+    ));
+  }, []);
+
   // Clear selected field when the tree table selection changes
   useEffect(() => {
     // If there's a selected field and it's not from the currently selected table, clear it
@@ -108,30 +305,62 @@ export default function FormBuilderPanel({
     }
 
     // Handle dropping field from left panel to form
-    if (over.id === 'form-builder' && active.data.current && !active.data.current.formId) {
+    if ((over.id === 'form-builder' || over.id?.toString().startsWith('block-')) && active.data.current && !active.data.current.formId) {
       const field = active.data.current as Field;
+      let blockId = 1; // Default to block 1
+
+      // If dropped on a specific block, use that block ID
+      if (over.id?.toString().startsWith('block-')) {
+        blockId = over.data.current?.blockId || 1;
+      } else {
+        // If dropped on general form area, use next available block
+        blockId = getNextBlockId();
+      }
+
       const newFormField: FormField = {
         ...field,
         formId: Math.random().toString(36).substr(2, 9),
-        tableId: state.selectedTreeTable || ''
+        tableId: state.selectedTreeTable || '',
+        blockId
       };
       setFormFields(prev => [...prev, newFormField]);
     }
 
-    // Handle reordering existing fields
-    if (active.id !== over.id) {
-      const currentTableFields = getCurrentTableFormFields();
-      const oldIndex = currentTableFields.findIndex(field => field.formId === active.id);
-      const newIndex = currentTableFields.findIndex(field => field.formId === over.id);
+    // Handle moving field between blocks
+    if (active.data.current?.formId && over.id?.toString().startsWith('block-')) {
+      const fieldId = active.id as string;
+      const targetBlockId = over.data.current?.blockId;
 
-      if (oldIndex !== -1 && newIndex !== -1) {
-        const reorderedFields = arrayMove(currentTableFields, oldIndex, newIndex);
+      if (targetBlockId) {
+        setFormFields(prev => prev.map(field =>
+          field.formId === fieldId
+            ? { ...field, blockId: targetBlockId }
+            : field
+        ));
+      }
+    }
 
-        // Update the main formFields array while preserving fields from other tables
-        setFormFields(prev => {
-          const otherTableFields = prev.filter(f => f.tableId !== state.selectedTreeTable);
-          return [...otherTableFields, ...reorderedFields];
-        });
+    // Handle reordering existing fields within the same block
+    if (active.id !== over.id && active.data.current?.formId && over.data.current?.formId) {
+      const activeField = formFields.find(f => f.formId === active.id);
+      const overField = formFields.find(f => f.formId === over.id);
+
+      if (activeField && overField && activeField.blockId === overField.blockId) {
+        const blockFields = currentTableFormFields.filter(f => f.blockId === activeField.blockId);
+        const oldIndex = blockFields.findIndex(field => field.formId === active.id);
+        const newIndex = blockFields.findIndex(field => field.formId === over.id);
+
+        if (oldIndex !== -1 && newIndex !== -1) {
+          const reorderedBlockFields = arrayMove(blockFields, oldIndex, newIndex);
+
+          // Update the main formFields array
+          setFormFields(prev => {
+            const otherFields = prev.filter(f =>
+              f.tableId !== state.selectedTreeTable || f.blockId !== activeField.blockId
+            );
+            return [...otherFields, ...reorderedBlockFields];
+          });
+        }
       }
     }
 
@@ -170,6 +399,21 @@ export default function FormBuilderPanel({
     // Update the selected field if it's the one being edited
     if (selectedFormField?.formId === formId) {
       setSelectedFormField(prev => prev ? { ...prev, [property]: value } : null);
+    }
+  };
+
+  // Block management functions
+  const handleAddBlock = () => {
+    // Add block is handled by dropping fields into new blocks
+    // This could be used for adding empty blocks if needed
+  };
+
+  const handleRemoveBlock = (blockId: number) => {
+    // Only remove if block is empty
+    const blockFields = currentTableFormFields.filter(f => f.blockId === blockId);
+    if (blockFields.length === 0) {
+      // No fields to remove, block is already empty
+      // Could add logic here to clean up empty block references if needed
     }
   };
 
@@ -568,63 +812,7 @@ export default function FormBuilderPanel({
                             border: '1px solid #BEADCE',
                             marginBottom: '1rem'
                           }}>
-                            {getFieldsByTableId(state.treeStructure[0].tableId).map((field) => {
-                              const title = field.customTitle || field.name;
-                              const isRequired = field.customRequired !== undefined ? field.customRequired : field.required;
-                              const tooltip = field.customTooltip;
-
-                              return (
-                                <div key={field.formId} style={{
-                                  marginBottom: '1.5rem',
-                                  padding: field.isPrimary ? '1rem' : '0',
-                                  backgroundColor: field.isPrimary ? 'white' : 'transparent',
-                                  border: field.isPrimary ? '2px solid #9E84B6' : 'none',
-                                  borderRadius: field.isPrimary ? '6px' : '0'
-                                }}>
-                                  <label style={{
-                                    display: 'block',
-                                    marginBottom: '0.5rem',
-                                    fontSize: '1rem',
-                                    fontWeight: field.isPrimary ? 'bold' : '600',
-                                    color: field.isPrimary ? '#003052' : '#2E3E4C'
-                                  }}>
-                                    {title}
-                                    {isRequired && (
-                                      <span style={{ color: '#B83230', marginLeft: '0.25rem' }}>*</span>
-                                    )}
-                                    {field.isPrimary && (
-                                      <span style={{
-                                        marginLeft: '0.5rem',
-                                        fontSize: '0.8rem',
-                                        backgroundColor: '#9E84B6',
-                                        color: 'white',
-                                        padding: '0.2rem 0.5rem',
-                                        borderRadius: '12px'
-                                      }}>
-                                        Primary
-                                      </span>
-                                    )}
-                                  </label>
-
-                                  {tooltip && (
-                                    <div style={{
-                                      marginBottom: '0.5rem',
-                                      fontSize: '0.9rem',
-                                      color: '#4C677F',
-                                      fontStyle: 'italic'
-                                    }}>
-                                      {tooltip}
-                                    </div>
-                                  )}
-
-                                  {field.type !== 'checkbox' ? renderInteractiveField(field) : (
-                                    <div style={{ marginTop: '0.5rem' }}>
-                                      {renderInteractiveField(field)}
-                                    </div>
-                                  )}
-                                </div>
-                              );
-                            })}
+                            {renderFieldsByBlocks(getFieldsByTableId(state.treeStructure[0].tableId))}
                           </div>
                         )}
                       </div>
@@ -715,63 +903,7 @@ export default function FormBuilderPanel({
                                 <p>No fields added to this table yet</p>
                               </div>
                             ) : (
-                              getFieldsByTableId(activeChildTab).map((field) => {
-                                const title = field.customTitle || field.name;
-                                const isRequired = field.customRequired !== undefined ? field.customRequired : field.required;
-                                const tooltip = field.customTooltip;
-
-                                return (
-                                  <div key={field.formId} style={{
-                                    marginBottom: '1.5rem',
-                                    padding: field.isPrimary ? '1rem' : '0',
-                                    backgroundColor: field.isPrimary ? 'white' : 'transparent',
-                                    border: field.isPrimary ? '2px solid #9E84B6' : 'none',
-                                    borderRadius: field.isPrimary ? '6px' : '0'
-                                  }}>
-                                    <label style={{
-                                      display: 'block',
-                                      marginBottom: '0.5rem',
-                                      fontSize: '1rem',
-                                      fontWeight: field.isPrimary ? 'bold' : '600',
-                                      color: field.isPrimary ? '#5C3285' : '#2E3E4C'
-                                    }}>
-                                      {title}
-                                      {isRequired && (
-                                        <span style={{ color: '#B83230', marginLeft: '0.25rem' }}>*</span>
-                                      )}
-                                      {field.isPrimary && (
-                                        <span style={{
-                                          marginLeft: '0.5rem',
-                                          fontSize: '0.8rem',
-                                          backgroundColor: '#9E84B6',
-                                          color: 'white',
-                                          padding: '0.2rem 0.5rem',
-                                          borderRadius: '12px'
-                                        }}>
-                                          Primary
-                                        </span>
-                                      )}
-                                    </label>
-
-                                    {tooltip && (
-                                      <div style={{
-                                        marginBottom: '0.5rem',
-                                        fontSize: '0.9rem',
-                                        color: '#4C677F',
-                                        fontStyle: 'italic'
-                                      }}>
-                                        {tooltip}
-                                      </div>
-                                    )}
-
-                                    {field.type !== 'checkbox' ? renderInteractiveField(field) : (
-                                      <div style={{ marginTop: '0.5rem' }}>
-                                        {renderInteractiveField(field)}
-                                      </div>
-                                    )}
-                                  </div>
-                                );
-                              })
+                              renderFieldsByBlocks(getFieldsByTableId(activeChildTab))
                             )}
                           </div>
                         )}
@@ -815,22 +947,44 @@ export default function FormBuilderPanel({
                   </div>
                 </div>
               ) : (
-                <SortableContext items={currentTableFormFields.map(f => f.formId)} strategy={verticalListSortingStrategy}>
-                  <div>
-                    <h3 style={{ marginTop: 0, marginBottom: '1.5rem', color: '#333' }}>
-                      {selectedTableName} Form ({currentTableFormFields.length} fields)
-                    </h3>
-                    {currentTableFormFields.map((field) => (
-                      <SortableFormField
-                        key={field.formId}
-                        field={field}
-                        onRemove={handleRemoveField}
-                        isSelected={selectedFormField?.formId === field.formId}
-                        onClick={() => setSelectedFormField(field)}
+                <div>
+                  <h3 style={{ marginTop: 0, marginBottom: '1.5rem', color: '#333' }}>
+                    {selectedTableName} Form ({currentTableFormFields.length} fields)
+                  </h3>
+                  {(() => {
+                    const fieldsByBlocks = getCurrentTableFieldsByBlocks();
+                    const blockIds = Object.keys(fieldsByBlocks).map(Number).sort((a, b) => a - b);
+
+                    if (blockIds.length === 0) {
+                      return (
+                        <FormBlock
+                          blockId={1}
+                          fields={[]}
+                          onRemoveField={handleRemoveField}
+                          onRemoveBlock={handleRemoveBlock}
+                          onAddBlock={handleAddBlock}
+                          selectedFormField={selectedFormField}
+                          onFieldClick={setSelectedFormField}
+                          isLastBlock={true}
+                        />
+                      );
+                    }
+
+                    return blockIds.map((blockId, index) => (
+                      <FormBlock
+                        key={blockId}
+                        blockId={blockId}
+                        fields={fieldsByBlocks[blockId] || []}
+                        onRemoveField={handleRemoveField}
+                        onRemoveBlock={handleRemoveBlock}
+                        onAddBlock={handleAddBlock}
+                        selectedFormField={selectedFormField}
+                        onFieldClick={setSelectedFormField}
+                        isLastBlock={index === blockIds.length - 1}
                       />
-                    ))}
-                  </div>
-                </SortableContext>
+                    ));
+                  })()}
+                </div>
               )}
             </DroppableFormArea>
           )}
