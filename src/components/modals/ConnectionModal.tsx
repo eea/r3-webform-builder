@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { sessionStorageUtils } from '../../utils/sessionStorage';
+import { connectionCookieUtils } from '../../utils/cookies';
 
 interface ConnectionModalProps {
   isOpen: boolean;
@@ -13,20 +13,24 @@ interface ConnectionModalProps {
 }
 
 export default function ConnectionModal({ isOpen, onClose, onSubmit }: ConnectionModalProps) {
-  // TODO: Remove hardcoded default values before production
-  const [environment, setEnvironment] = useState('sandbox');
-  const [apiKey, setApiKey] = useState('2ad75cfa-7021-4332-9557-877cab580268');
-  const [dataflowId, setDataflowId] = useState('11734');
+  const [environment, setEnvironment] = useState('');
+  const [apiKey, setApiKey] = useState('');
+  const [dataflowId, setDataflowId] = useState('');
   const [webformName, setWebformName] = useState('');
 
   // Load saved connection settings when modal opens
   useEffect(() => {
     if (isOpen) {
-      const savedConnection = sessionStorageUtils.loadConnection();
+      const savedConnection = connectionCookieUtils.loadConnection();
       if (savedConnection) {
         setEnvironment(savedConnection.environment);
         setApiKey(savedConnection.apiKey);
         setDataflowId(savedConnection.dataflowId);
+      }
+
+      const savedWebformName = connectionCookieUtils.loadWebformName();
+      if (savedWebformName) {
+        setWebformName(savedWebformName);
       }
     }
   }, [isOpen]);

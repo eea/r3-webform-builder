@@ -13,9 +13,10 @@ interface Field {
 
 interface SchemaViewProps {
   onFieldSelect: (field: Field) => void;
+  onDatasetChange?: () => void;
 }
 
-export default function SchemaView({ onFieldSelect }: SchemaViewProps) {
+export default function SchemaView({ onFieldSelect, onDatasetChange }: SchemaViewProps) {
   const { state, setSelectedDataset, setSelectedTable, addRootTable, addTab, addRootTableToTree, addChildTableToTree, setSelectedTreeTable } = useApp();
   const [label, setLabel] = useState<string>('');
   const [title, setTitle] = useState<string>('');
@@ -138,7 +139,10 @@ export default function SchemaView({ onFieldSelect }: SchemaViewProps) {
 
           <select
             value={state.selectedDataset}
-            onChange={(e) => setSelectedDataset(e.target.value)}
+            onChange={(e) => {
+              setSelectedDataset(e.target.value);
+              onDatasetChange?.();
+            }}
             className="dataset-dropdown"
             disabled={!state.isConnected}
           >

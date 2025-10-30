@@ -5,7 +5,6 @@ import ConnectionModal from './components/modals/ConnectionModal';
 import SchemaView from './components/SchemaView';
 import FormBuilderView from './components/FormBuilderView';
 import { fetchDatasets } from './services/api';
-import { sessionStorageUtils } from './utils/sessionStorage';
 import { FaRegSquareCaretRight, FaRegSquareCaretLeft } from 'react-icons/fa6';
 
 interface FormField {
@@ -29,7 +28,7 @@ function AppContent() {
   // Auto-load datasets if connection exists in session storage
   useEffect(() => {
     const loadDatasetsFromSession = async () => {
-      if (state.isConnected && state.connection && state.datasets.length === 0) {
+      if (state.isConnected && state.connection && state.connection.apiKey && state.datasets.length === 0) {
         setIsLoading(true);
         setError(null);
 
@@ -170,7 +169,12 @@ function AppContent() {
               transition: 'width 0.3s ease',
               overflow: 'hidden'
             }}>
-              {isLeftPanelVisible && <SchemaView onFieldSelect={handleFieldSelect} />}
+              {isLeftPanelVisible && (
+                <SchemaView
+                  onFieldSelect={handleFieldSelect}
+                  onDatasetChange={handleClearForm}
+                />
+              )}
             </div>
 
             <FormBuilderView

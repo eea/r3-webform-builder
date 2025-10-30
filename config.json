@@ -1,0 +1,33 @@
+{
+  "cookies": {
+    "expiration": {
+      "days": 30,
+      "hours": 0,
+      "minutes": 0
+    },
+    "options": {
+      "path": "/",
+      "sameSite": "lax",
+      "secure": false
+    }
+  },
+  "api": {
+    "timeout": 30000,
+    "retryAttempts": 3
+  },
+  "storage": {
+    "keys": {
+      "connection": "r3-webform-session-data",
+      "webformName": "r3-webform-name",
+      "selectedDataset": "r3-webform-selected-dataset"
+    },
+    "security": {
+      "excludeApiKeyFromCookies": true,
+      "useSessionStorageForApiKey": true
+    }
+  },
+  "ui": {
+    "defaultEnvironment": "sandbox",
+    "autoSaveInterval": 5000
+  }
+}

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import { sessionStorageUtils } from '../utils/sessionStorage';
+import { connectionCookieUtils } from '../utils/cookies';
 
 interface Table {
   id: string;
@@ -80,16 +80,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     webformName: ''
   });
 
-  // Load connection data, webform name, and selected dataset from session storage on component mount
+  // Load connection data, webform name, and selected dataset from cookies on component mount
   useEffect(() => {
-    const savedConnection = sessionStorageUtils.loadConnection();
-    const savedWebformName = sessionStorageUtils.loadWebformName();
-    const savedSelectedDataset = sessionStorageUtils.loadSelectedDataset();
+    const savedConnection = connectionCookieUtils.loadConnection();
+    const savedWebformName = connectionCookieUtils.loadWebformName();
+    const savedSelectedDataset = connectionCookieUtils.loadSelectedDataset();
 
-    if (savedConnection || savedWebformName || savedSelectedDataset) {
+    // Only consider connection valid if API key is present
+    const hasValidConnection = savedConnection && savedConnection.apiKey && savedConnection.apiKey.trim() !== '';
+
+    if (hasValidConnection || savedWebformName || savedSelectedDataset) {
       setState(prev => ({
         ...prev,
-        ...(savedConnection && { connection: savedConnection, isConnected: true }),
+        ...(hasValidConnection && { connection: savedConnection, isConnected: true }),
         ...(savedWebformName && { webformName: savedWebformName }),
         ...(savedSelectedDataset && { selectedDataset: savedSelectedDataset })
       }));
@@ -97,8 +100,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setConnection = (connection: ConnectionData) => {
-    // Save to session storage
-    sessionStorageUtils.saveConnection(connection);
+    // Save to cookies
+    connectionCookieUtils.saveConnection(connection);
 
     setState(prev => ({
       ...prev,
@@ -115,13 +118,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const setSelectedDataset = (datasetId: string) => {
-    // Save to session storage
-    sessionStorageUtils.saveSelectedDataset(datasetId);
+    // Save to cookies
+    connectionCookieUtils.saveSelectedDataset(datasetId);
 
     setState(prev => ({
       ...prev,
       selectedDataset: datasetId,
-      selectedTable: ''
+      selectedTable: '',
+      // Clear tree structure and form builder state when dataset changes
+      rootTables: [],
+      tabs: [],
+      treeStructure: [],
+      hasRootTable: false,
+      selectedTreeTable: ''
     }));
   };
 
@@ -202,8 +211,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const setWebformName = (name: string) => {
-    // Save to session storage
-    sessionStorageUtils.saveWebformName(name);
+    // Save to cookies
+    connectionCookieUtils.saveWebformName(name);
 
     setState(prev => ({
       ...prev,
