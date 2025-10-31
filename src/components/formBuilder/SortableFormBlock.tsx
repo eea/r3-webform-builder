@@ -1,11 +1,12 @@
-import { SortableContext, horizontalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import { useDroppable } from '@dnd-kit/core';
 import { FaGripVertical } from 'react-icons/fa';
 import SortableFormField from './SortableFormField';
 import type { FormField } from '../../types/formBuilder';
 
-interface FormBlockProps {
+interface SortableFormBlockProps {
   blockId: number;
   fields: FormField[];
   onRemoveField: (formId: string) => void;
@@ -16,7 +17,7 @@ interface FormBlockProps {
   isLastBlock: boolean;
 }
 
-export default function FormBlock({
+export default function SortableFormBlock({
   blockId,
   fields,
   onRemoveField,
@@ -25,52 +26,43 @@ export default function FormBlock({
   selectedFormField,
   onFieldClick,
   isLastBlock
-}: FormBlockProps) {
-  const { setNodeRef: setDropRef, isOver } = useDroppable({
-    id: `block-${blockId}`,
-    data: { blockId }
-  });
-
+}: SortableFormBlockProps) {
   const {
     attributes,
     listeners,
-    setNodeRef: setSortableRef,
+    setNodeRef,
     transform,
     transition,
-    isDragging,
+    isDragging
   } = useSortable({
-    id: `sortable-block-${blockId}`,
+    id: `block-${blockId}`,
     data: { type: 'block', blockId }
   });
 
-  const sortableStyle = {
+  const { setNodeRef: setDroppableRef, isOver } = useDroppable({
+    id: `droppable-block-${blockId}`,
+    data: { blockId }
+  });
+
+  const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
-  // Combine refs
-  const combineRefs = (element: HTMLDivElement | null) => {
-    setDropRef(element);
-    setSortableRef(element);
+    opacity: isDragging ? 0.5 : 1
   };
 
   return (
-    <div style={{ ...sortableStyle, marginBottom: '1rem' }}>
+    <div ref={setNodeRef} style={{ ...style, marginBottom: '1rem' }}>
       {/* Block Content */}
       <div
-        ref={combineRefs}
         style={{
           minHeight: '100px',
           padding: '0.5rem',
-          paddingBottom: '0.5rem',
-          backgroundColor: isOver ? '#e3f2fd' : 'white',
+          paddingBottom: '0.1rem',
           border: '2px solid #dee2e6',
           borderRadius: '4px',
           display: 'flex',
           gap: '0.5rem',
           alignItems: 'flex-start',
-          transition: 'background-color 0.2s ease',
           position: 'relative'
         }}
       >
@@ -79,9 +71,7 @@ export default function FormBlock({
           <div style={{
             display: 'flex',
             paddingRight: '0.5rem',
-            paddingTop: '0.25rem',
-            pointerEvents: 'auto',
-            zIndex: 10
+            paddingTop: '0.25rem'
           }}>
             <FaGripVertical
               {...attributes}
@@ -89,22 +79,26 @@ export default function FormBlock({
               style={{
                 color: '#4C677F',
                 cursor: isDragging ? 'grabbing' : 'grab',
-                fontSize: '1rem',
-                pointerEvents: 'auto'
+                fontSize: '1rem'
               }}
               title="Drag to reorder block"
             />
           </div>
         )}
 
-        {/* Fields Container */}
+        {/* Fields Container - This is the droppable area */}
         <div
+          ref={setDroppableRef}
           style={{
             display: 'flex',
             gap: '1rem',
             alignItems: 'flex-start',
             flex: 1,
-            width: '100%'
+            width: '100%',
+            backgroundColor: isOver ? '#e3f2fd' : 'transparent',
+            transition: 'background-color 0.2s ease',
+            borderRadius: '4px',
+            minHeight: '80px'
           }}
         >
           {fields.length === 0 ? (

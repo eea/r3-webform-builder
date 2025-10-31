@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { DndContext, DragOverlay } from '@dnd-kit/core';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
-import { SortableContext, horizontalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
+import { SortableContext, horizontalListSortingStrategy, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { useApp } from '../context/AppContext';
 import { FaPlus, FaTable, FaWpforms, FaCog, FaChevronDown, FaEye, FaEdit } from 'react-icons/fa';
 import { getFieldIcon } from '../utils/formBuilder/fieldIcons';
@@ -13,6 +13,7 @@ import SortableFormField from './formBuilder/SortableFormField';
 import DroppableFormArea from './formBuilder/DroppableFormArea';
 import PropertiesInspector from './formBuilder/PropertiesInspector';
 import FormBlock from './formBuilder/FormBlock';
+import SortableFormBlock from './formBuilder/SortableFormBlock';
 
 import type { Field, FormField, FormBuilderViewProps } from '../types/formBuilder';
 
@@ -35,6 +36,7 @@ export default function FormBuilderPanel({
   const [editingTableProperties, setEditingTableProperties] = useState(false);
   const [editTitle, setEditTitle] = useState('');
   const [editLabel, setEditLabel] = useState('');
+  const [blockOrderMap, setBlockOrderMap] = useState<Record<string, number[]>>({});
 
   // Get the selected table's fields
   const getSelectedTableFields = (): Field[] => {
@@ -294,6 +296,43 @@ export default function FormBuilderPanel({
     }
   }, [state.selectedTreeTable, selectedFormField]);
 
+  // Keep blockOrderMap in sync with actual blocks
+  useEffect(() => {
+    if (!state.selectedTreeTable) return;
+
+    const tableKey = state.selectedTreeTable;
+    const fieldsByBlocks = getCurrentTableFieldsByBlocks();
+    const actualBlockIds = Object.keys(fieldsByBlocks).map(Number).sort((a, b) => a - b);
+
+    console.log('useEffect - actualBlockIds:', actualBlockIds);
+
+    setBlockOrderMap(prev => {
+      const currentOrder = prev[tableKey] || [];
+
+      console.log('useEffect - currentOrder:', currentOrder);
+
+      // Check if there are new blocks not in the current order
+      const newBlocks = actualBlockIds.filter(id => !currentOrder.includes(id));
+
+      if (newBlocks.length > 0) {
+        console.log('useEffect - Adding new blocks:', newBlocks);
+        // Add new blocks to the end of the order
+        return { ...prev, [tableKey]: [...currentOrder, ...newBlocks] };
+      }
+
+      // Check if there are blocks in order that no longer exist
+      const validOrder = currentOrder.filter(id => actualBlockIds.includes(id));
+
+      if (validOrder.length !== currentOrder.length) {
+        console.log('useEffect - Removing invalid blocks');
+        // Remove blocks that no longer exist
+        return { ...prev, [tableKey]: validOrder };
+      }
+
+      return prev;
+    });
+  }, [formFields, state.selectedTreeTable]);
+
   const handleDragStart = (event: DragStartEvent) => {
     const field = event.active.data.current as Field;
     setActiveField(field);
@@ -307,13 +346,49 @@ export default function FormBuilderPanel({
       return;
     }
 
+    // Handle block reordering
+    if (active.data.current?.type === 'block' && over.data.current?.type === 'block') {
+      const activeBlockId = active.data.current.blockId;
+      const overBlockId = over.data.current.blockId;
+
+      console.log('Block reorder detected:', { activeBlockId, overBlockId });
+
+      if (activeBlockId !== overBlockId && state.selectedTreeTable) {
+        setBlockOrderMap(prev => {
+          const tableKey = state.selectedTreeTable || '';
+
+          // Get current order or default to sorted blockIds
+          const fieldsByBlocks = getCurrentTableFieldsByBlocks();
+          const blockIds = Object.keys(fieldsByBlocks).map(Number).sort((a, b) => a - b);
+          const currentOrder = prev[tableKey] || blockIds;
+
+          console.log('Current order:', currentOrder, 'Block IDs:', blockIds);
+
+          const oldIndex = currentOrder.indexOf(activeBlockId);
+          const newIndex = currentOrder.indexOf(overBlockId);
+
+          console.log('Indices:', { oldIndex, newIndex });
+
+          if (oldIndex !== -1 && newIndex !== -1) {
+            const newOrder = arrayMove(currentOrder, oldIndex, newIndex);
+            console.log('New order:', newOrder);
+            return { ...prev, [tableKey]: newOrder };
+          }
+
+          return prev;
+        });
+      }
+      setActiveField(null);
+      return;
+    }
+
     // Handle dropping field from left panel to form
-    if ((over.id === 'form-builder' || over.id?.toString().startsWith('block-')) && active.data.current && !active.data.current.formId) {
+    if ((over.id === 'form-builder' || over.id?.toString().startsWith('droppable-block-')) && active.data.current && !active.data.current.formId) {
       const field = active.data.current as Field;
       let blockId = 1; // Default to block 1
 
       // If dropped on a specific block, use that block ID
-      if (over.id?.toString().startsWith('block-')) {
+      if (over.id?.toString().startsWith('droppable-block-')) {
         blockId = over.data.current?.blockId || 1;
       } else {
         // If dropped on general form area, use next available block
@@ -330,7 +405,7 @@ export default function FormBuilderPanel({
     }
 
     // Handle moving field between blocks
-    if (active.data.current?.formId && over.id?.toString().startsWith('block-')) {
+    if (active.data.current?.formId && over.id?.toString().startsWith('droppable-block-')) {
       const fieldId = active.id as string;
       const targetBlockId = over.data.current?.blockId;
 
@@ -1129,7 +1204,11 @@ export default function FormBuilderPanel({
                   })()}
                   {(() => {
                     const fieldsByBlocks = getCurrentTableFieldsByBlocks();
-                    const blockIds = Object.keys(fieldsByBlocks).map(Number).sort((a, b) => a - b);
+                    const defaultBlockIds = Object.keys(fieldsByBlocks).map(Number).sort((a, b) => a - b);
+
+                    // Use custom order if available, otherwise use default sorted order
+                    const tableKey = state.selectedTreeTable || '';
+                    const blockIds = blockOrderMap[tableKey] || defaultBlockIds;
 
                     if (blockIds.length === 0) {
                       return (
@@ -1146,19 +1225,26 @@ export default function FormBuilderPanel({
                       );
                     }
 
-                    return blockIds.map((blockId, index) => (
-                      <FormBlock
-                        key={blockId}
-                        blockId={blockId}
-                        fields={fieldsByBlocks[blockId] || []}
-                        onRemoveField={handleRemoveField}
-                        onRemoveBlock={handleRemoveBlock}
-                        onAddBlock={handleAddBlock}
-                        selectedFormField={selectedFormField}
-                        onFieldClick={setSelectedFormField}
-                        isLastBlock={index === blockIds.length - 1}
-                      />
-                    ));
+                    return (
+                      <SortableContext
+                        items={blockIds.map(id => `block-${id}`)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        {blockIds.map((blockId, index) => (
+                          <SortableFormBlock
+                            key={blockId}
+                            blockId={blockId}
+                            fields={fieldsByBlocks[blockId] || []}
+                            onRemoveField={handleRemoveField}
+                            onRemoveBlock={handleRemoveBlock}
+                            onAddBlock={handleAddBlock}
+                            selectedFormField={selectedFormField}
+                            onFieldClick={setSelectedFormField}
+                            isLastBlock={index === blockIds.length - 1}
+                          />
+                        ))}
+                      </SortableContext>
+                    );
                   })()}
                 </div>
               )}
