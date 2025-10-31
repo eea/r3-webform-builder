@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { FaTable, FaLayerGroup, FaPlusCircle, FaSitemap } from 'react-icons/fa';
+import { FaTable, FaLayerGroup, FaPlusCircle, FaSitemap, FaTimes } from 'react-icons/fa';
 import './SchemaView.css';
 
 interface Field {
@@ -17,7 +17,7 @@ interface SchemaViewProps {
 }
 
 export default function SchemaView({ onFieldSelect, onDatasetChange }: SchemaViewProps) {
-  const { state, setSelectedDataset, setSelectedTable, addRootTableToTree, addChildTableToTree, setSelectedTreeTable } = useApp();
+  const { state, setSelectedDataset, setSelectedTable, addRootTableToTree, addChildTableToTree, setSelectedTreeTable, removeTableFromTree } = useApp();
   const [label, setLabel] = useState<string>('');
   const [title, setTitle] = useState<string>('');
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
@@ -89,6 +89,11 @@ export default function SchemaView({ onFieldSelect, onDatasetChange }: SchemaVie
       setSelectedTreeTable(node.tableId);
     };
 
+    const handleRemoveClick = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      removeTableFromTree(node.id);
+    };
+
     // Determine node type for styling
     const nodeType = isActualRoot ? 'root' : isHopelineChild ? 'hopeline' : 'child';
 
@@ -115,6 +120,12 @@ export default function SchemaView({ onFieldSelect, onDatasetChange }: SchemaVie
               {node.title} ({tableName})
             </div>
           </div>
+
+          <FaTimes
+            className="tree-node-remove"
+            onClick={handleRemoveClick}
+            title="Remove table"
+          />
         </div>
 
         {node.children.length > 0 && (

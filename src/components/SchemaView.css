@@ -340,6 +340,26 @@
   min-width: 0;
 }
 
+.tree-node-remove {
+  color: #dc2626;
+  font-size: 1rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s ease;
+  padding: 0.25rem;
+  border-radius: 4px;
+  margin-left: 0.5rem;
+}
+
+.tree-node-content:hover .tree-node-remove {
+  opacity: 1;
+}
+
+.tree-node-remove:hover {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
 .tree-node-label {
   font-weight: 600;
   font-size: 0.85rem;

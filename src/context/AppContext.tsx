@@ -62,6 +62,8 @@ interface AppContextType {
   setSelectedTreeTable: (tableId: string) => void;
   setWebformName: (name: string) => void;
   updateTableProperties: (tableId: string, label: string, title: string) => void;
+  removeTableFromTree: (nodeId: string) => void;
+  reorderChildTables: (oldIndex: number, newIndex: number) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -240,6 +242,70 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  const removeTableFromTree = (nodeId: string) => {
+    const removeNodeRecursively = (nodes: TreeNode[]): TreeNode[] => {
+      return nodes
+        .filter(node => node.id !== nodeId)
+        .map(node => ({
+          ...node,
+          children: removeNodeRecursively(node.children)
+        }));
+    };
+
+    setState(prev => {
+      const newTreeStructure = removeNodeRecursively(prev.treeStructure);
+
+      // Check if we removed the root table (first element was removed and hasRootTable was true)
+      const removedRoot = prev.hasRootTable && prev.treeStructure.length > 0 && newTreeStructure.length === 0;
+
+      // Find the tableId of the removed node to update rootTables and tabs
+      const findTableId = (nodes: TreeNode[], id: string): string | null => {
+        for (const node of nodes) {
+          if (node.id === id) return node.tableId;
+          const found = findTableId(node.children, id);
+          if (found) return found;
+        }
+        return null;
+      };
+
+      const removedTableId = findTableId(prev.treeStructure, nodeId);
+
+      return {
+        ...prev,
+        treeStructure: newTreeStructure,
+        hasRootTable: removedRoot ? false : prev.hasRootTable,
+        rootTables: removedTableId ? prev.rootTables.filter(id => id !== removedTableId) : prev.rootTables,
+        tabs: removedTableId ? prev.tabs.filter(id => id !== removedTableId) : prev.tabs,
+        selectedTreeTable: prev.selectedTreeTable === removedTableId ? '' : prev.selectedTreeTable
+      };
+    });
+  };
+
+  const reorderChildTables = (oldIndex: number, newIndex: number) => {
+    setState(prev => {
+      if (!prev.hasRootTable || prev.treeStructure.length === 0) {
+        return prev;
+      }
+
+      const rootNode = prev.treeStructure[0];
+      const children = [...rootNode.children];
+
+      // Remove the item from old position and insert at new position
+      const [movedItem] = children.splice(oldIndex, 1);
+      children.splice(newIndex, 0, movedItem);
+
+      return {
+        ...prev,
+        treeStructure: [
+          {
+            ...rootNode,
+            children
+          }
+        ]
+      };
+    });
+  };
+
   return (
     <AppContext.Provider value={{
       state,
@@ -253,7 +319,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       addChildTableToTree,
       setSelectedTreeTable,
       setWebformName,
-      updateTableProperties
+      updateTableProperties,
+      removeTableFromTree,
+      reorderChildTables
     }}>
       {children}
     </AppContext.Provider>
