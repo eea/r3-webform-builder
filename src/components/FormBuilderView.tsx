@@ -1015,7 +1015,8 @@ export default function FormBuilderPanel({
                                   fontSize: '1rem',
                                   padding: '0.25rem',
                                   borderRadius: '3px',
-                                  transition: 'all 0.2s ease'
+                                  transition: 'all 0.2s ease',
+                                  marginTop:'0.6rem',
                                 }}
                                 onMouseEnter={(e) => {
                                   e.currentTarget.style.backgroundColor = '#f0f8ff';
