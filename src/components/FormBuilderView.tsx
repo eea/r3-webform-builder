@@ -14,6 +14,7 @@ import DroppableFormArea from './formBuilder/DroppableFormArea';
 import PropertiesInspector from './formBuilder/PropertiesInspector';
 import FormBlock from './formBuilder/FormBlock';
 import SortableFormBlock from './formBuilder/SortableFormBlock';
+import SortableTab from './formBuilder/SortableTab';
 
 import type { Field, FormField, FormBuilderViewProps } from '../types/formBuilder';
 
@@ -37,6 +38,7 @@ export default function FormBuilderPanel({
   const [editTitle, setEditTitle] = useState('');
   const [editLabel, setEditLabel] = useState('');
   const [blockOrderMap, setBlockOrderMap] = useState<Record<string, number[]>>({});
+  const [tabOrder, setTabOrder] = useState<string[]>([]);
 
   // Get the selected table's fields
   const getSelectedTableFields = (): Field[] => {
@@ -266,10 +268,31 @@ export default function FormBuilderPanel({
     return rootNode.children || [];
   };
 
+  // Get child tables in sorted order
+  const getOrderedChildTables = () => {
+    const childTables = getChildTables();
+    if (tabOrder.length === 0) return childTables;
+
+    // Sort tables based on tabOrder
+    return [...childTables].sort((a, b) => {
+      const indexA = tabOrder.indexOf(a.tableId);
+      const indexB = tabOrder.indexOf(b.tableId);
+      return indexA - indexB;
+    });
+  };
+
   // Get consistent icon for all child table tabs
   const getTableIcon = () => {
     return <FaTable />;
   };
+
+  // Initialize tab order
+  useEffect(() => {
+    const childTables = getChildTables();
+    if (childTables.length > 0 && tabOrder.length === 0) {
+      setTabOrder(childTables.map(t => t.tableId));
+    }
+  }, [state.treeStructure, tabOrder.length]);
 
   // Initialize active child tab
   useEffect(() => {
@@ -342,6 +365,26 @@ export default function FormBuilderPanel({
     const { active, over } = event;
 
     if (!over) {
+      setActiveField(null);
+      return;
+    }
+
+    // Handle tab reordering
+    if (active.data.current?.type === 'tab' && over.data.current?.type === 'tab') {
+      const activeTabId = active.data.current.tableId;
+      const overTabId = over.data.current.tableId;
+
+      if (activeTabId !== overTabId) {
+        setTabOrder(prev => {
+          const oldIndex = prev.indexOf(activeTabId);
+          const newIndex = prev.indexOf(overTabId);
+
+          if (oldIndex !== -1 && newIndex !== -1) {
+            return arrayMove(prev, oldIndex, newIndex);
+          }
+          return prev;
+        });
+      }
       setActiveField(null);
       return;
     }
@@ -918,49 +961,20 @@ export default function FormBuilderPanel({
                           boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
                           border: '1px solid #e2e8f0'
                         }}>
-                          {getChildTables().map((childTable, index) => (
-                            <button
-                              key={childTable.tableId}
-                              type="button"
-                              onClick={() => setActiveChildTab(childTable.tableId)}
-                              style={{
-                                flex: 1,
-                                padding: '0.75rem 1.5rem',
-                                backgroundColor: activeChildTab === childTable.tableId ? 'white' : 'transparent',
-                                color: activeChildTab === childTable.tableId ? '#1f2937' : '#6b7280',
-                                border: 'none',
-                                borderRadius: '6px',
-                                cursor: 'pointer',
-                                fontSize: '0.95rem',
-                                fontWeight: activeChildTab === childTable.tableId ? '600' : '500',
-                                transition: 'all 0.2s ease',
-                                position: 'relative',
-                                marginRight: index < getChildTables().length - 1 ? '2px' : '0',
-                                boxShadow: activeChildTab === childTable.tableId ? '0 2px 4px rgba(0, 0, 0, 0.1)' : 'none',
-                                transform: activeChildTab === childTable.tableId ? 'translateY(-1px)' : 'none',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'flex-start'
-                              }}
-                              onMouseEnter={(e) => {
-                                if (activeChildTab !== childTable.tableId) {
-                                  e.currentTarget.style.backgroundColor = '#e5e7eb';
-                                  e.currentTarget.style.color = '#374151';
-                                }
-                              }}
-                              onMouseLeave={(e) => {
-                                if (activeChildTab !== childTable.tableId) {
-                                  e.currentTarget.style.backgroundColor = 'transparent';
-                                  e.currentTarget.style.color = '#6b7280';
-                                }
-                              }}
-                            >
-                              <span style={{ marginRight: '0.5rem' }}>
-                                {getTableIcon()}
-                              </span>
-                              {childTable.title}
-                            </button>
-                          ))}
+                          <SortableContext
+                            items={tabOrder}
+                            strategy={horizontalListSortingStrategy}
+                          >
+                            {getOrderedChildTables().map((childTable) => (
+                              <SortableTab
+                                key={childTable.tableId}
+                                childTable={childTable}
+                                isActive={activeChildTab === childTable.tableId}
+                                onClick={() => setActiveChildTab(childTable.tableId)}
+                                getTableIcon={getTableIcon}
+                              />
+                            ))}
+                          </SortableContext>
                         </div>
 
                         {/* Active Tab Content */}

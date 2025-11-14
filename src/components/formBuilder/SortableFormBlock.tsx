@@ -63,7 +63,9 @@ export default function SortableFormBlock({
           display: 'flex',
           gap: '0.5rem',
           alignItems: 'flex-start',
-          position: 'relative'
+          position: 'relative',
+          backgroundColor: isOver ? '#e3f2fd' : 'white',
+          transition: 'background-color 0.2s ease'
         }}
       >
         {/* Drag Handle - Positioned at top-left */}
@@ -95,8 +97,6 @@ export default function SortableFormBlock({
             alignItems: 'flex-start',
             flex: 1,
             width: '100%',
-            backgroundColor: isOver ? '#e3f2fd' : 'transparent',
-            transition: 'background-color 0.2s ease',
             borderRadius: '4px',
             minHeight: '80px'
           }}
