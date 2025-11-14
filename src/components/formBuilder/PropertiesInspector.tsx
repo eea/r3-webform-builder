@@ -53,12 +53,14 @@ export default function PropertiesInspector({
         border: '1px solid #87A7C3',
         marginRight: '-1rem'
       }}>
-        <div style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '0.25rem' }}>
+        <div style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: selectedField.type.toLowerCase() === 'label' ? '0' : '0.25rem' }}>
           {selectedField.name}
         </div>
-        <div style={{ fontSize: '0.8rem', color: '#4C677F' }}>
-          Type: {selectedField.type}
-        </div>
+        {selectedField.type.toLowerCase() !== 'label' && (
+          <div style={{ fontSize: '0.8rem', color: '#4C677F' }}>
+            Type: {selectedField.type}
+          </div>
+        )}
       </div>
 
       {/* Custom Title */}
@@ -133,7 +135,7 @@ export default function PropertiesInspector({
             Heading Level
           </label>
           <select
-            value={selectedField.customLevel || selectedField.level || 1}
+            value={selectedField.customLevel || selectedField.level || 2}
             onChange={(e) => onUpdateField(selectedField.formId, 'customLevel', parseInt(e.target.value))}
             style={{
               width: '100%',
@@ -182,72 +184,78 @@ export default function PropertiesInspector({
         </div>
       )}
 
-      {/* Required Toggle */}
-      <div style={{ marginBottom: '1rem' }}>
-        <label style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          fontWeight: 'bold',
-          fontSize: '0.9rem',
-          cursor: 'pointer'
-        }}>
-          <input
-            type="checkbox"
-            checked={selectedField.customRequired !== undefined ? selectedField.customRequired : selectedField.required}
-            onChange={(e) => onUpdateField(selectedField.formId, 'customRequired', e.target.checked)}
-            style={{ cursor: 'pointer' }}
-          />
-          Required Field
-        </label>
-      </div>
-
-      {/* Primary Field Toggle */}
-      <div style={{ marginBottom: '1rem' }}>
-        <label style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          fontWeight: 'bold',
-          fontSize: '0.9rem',
-          cursor: 'pointer'
-        }}>
-          <input
-            type="checkbox"
-            checked={selectedField.isPrimary || false}
-            onChange={(e) => onUpdateField(selectedField.formId, 'isPrimary', e.target.checked)}
-            style={{ cursor: 'pointer' }}
-          />
-          <FaKey style={{ color: '#47B3FF', fontSize: '0.8rem' }} />
-          Primary Field
-        </label>
-        <div style={{ fontSize: '0.8rem', color: '#4C677F', marginTop: '0.25rem', marginLeft: '1.5rem' }}>
-          Primary fields are highlighted in the form
+      {/* Required Toggle - Hide for label fields */}
+      {selectedField.type.toLowerCase() !== 'label' && (
+        <div style={{ marginBottom: '1rem' }}>
+          <label style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            fontWeight: 'bold',
+            fontSize: '0.9rem',
+            cursor: 'pointer'
+          }}>
+            <input
+              type="checkbox"
+              checked={selectedField.customRequired !== undefined ? selectedField.customRequired : selectedField.required}
+              onChange={(e) => onUpdateField(selectedField.formId, 'customRequired', e.target.checked)}
+              style={{ cursor: 'pointer' }}
+            />
+            Required Field
+          </label>
         </div>
-      </div>
+      )}
 
-      {/* Read Only Toggle */}
-      <div style={{ marginBottom: '1rem' }}>
-        <label style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          fontWeight: 'bold',
-          fontSize: '0.9rem',
-          cursor: 'pointer'
-        }}>
-          <input
-            type="checkbox"
-            checked={selectedField.customReadOnly !== undefined ? selectedField.customReadOnly : (selectedField.readOnly || false)}
-            onChange={(e) => onUpdateField(selectedField.formId, 'customReadOnly', e.target.checked)}
-            style={{ cursor: 'pointer' }}
-          />
-          Read Only
-        </label>
-        <div style={{ fontSize: '0.8rem', color: '#4C677F', marginTop: '0.25rem', marginLeft: '1.5rem' }}>
-          Field cannot be edited by users
+      {/* Primary Field Toggle - Hide for label fields */}
+      {selectedField.type.toLowerCase() !== 'label' && (
+        <div style={{ marginBottom: '1rem' }}>
+          <label style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            fontWeight: 'bold',
+            fontSize: '0.9rem',
+            cursor: 'pointer'
+          }}>
+            <input
+              type="checkbox"
+              checked={selectedField.isPrimary || false}
+              onChange={(e) => onUpdateField(selectedField.formId, 'isPrimary', e.target.checked)}
+              style={{ cursor: 'pointer' }}
+            />
+            <FaKey style={{ color: '#47B3FF', fontSize: '0.8rem' }} />
+            Primary Field
+          </label>
+          <div style={{ fontSize: '0.8rem', color: '#4C677F', marginTop: '0.25rem', marginLeft: '1.5rem' }}>
+            Primary fields are highlighted in the form
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Read Only Toggle - Hide for label fields */}
+      {selectedField.type.toLowerCase() !== 'label' && (
+        <div style={{ marginBottom: '1rem' }}>
+          <label style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            fontWeight: 'bold',
+            fontSize: '0.9rem',
+            cursor: 'pointer'
+          }}>
+            <input
+              type="checkbox"
+              checked={selectedField.customReadOnly !== undefined ? selectedField.customReadOnly : (selectedField.readOnly || false)}
+              onChange={(e) => onUpdateField(selectedField.formId, 'customReadOnly', e.target.checked)}
+              style={{ cursor: 'pointer' }}
+            />
+            Read Only
+          </label>
+          <div style={{ fontSize: '0.8rem', color: '#4C677F', marginTop: '0.25rem', marginLeft: '1.5rem' }}>
+            Field cannot be edited by users
+          </div>
+        </div>
+      )}
 
       {/* Auto Increment Toggle - for number fields */}
       {['number', 'number_integer'].includes(selectedField.type.toLowerCase()) && (
@@ -274,29 +282,31 @@ export default function PropertiesInspector({
         </div>
       )}
 
-      {/* Visibility Toggle */}
-      <div style={{ marginBottom: '1rem' }}>
-        <label style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          fontWeight: 'bold',
-          fontSize: '0.9rem',
-          cursor: 'pointer'
-        }}>
-          <input
-            type="checkbox"
-            checked={selectedField.customIsVisible !== undefined ? !selectedField.customIsVisible : !(selectedField.isVisible !== false)}
-            onChange={(e) => onUpdateField(selectedField.formId, 'customIsVisible', !e.target.checked)}
-            style={{ cursor: 'pointer' }}
-          />
-          <FaEye style={{ color: '#47B3FF', fontSize: '0.8rem' }} />
-          Hidden Field
-        </label>
-        <div style={{ fontSize: '0.8rem', color: '#4C677F', marginTop: '0.25rem', marginLeft: '1.5rem' }}>
-          Field is not visible to users but included in data
+      {/* Visibility Toggle - Hide for label fields */}
+      {selectedField.type.toLowerCase() !== 'label' && (
+        <div style={{ marginBottom: '1rem' }}>
+          <label style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            fontWeight: 'bold',
+            fontSize: '0.9rem',
+            cursor: 'pointer'
+          }}>
+            <input
+              type="checkbox"
+              checked={selectedField.customIsVisible !== undefined ? !selectedField.customIsVisible : !(selectedField.isVisible !== false)}
+              onChange={(e) => onUpdateField(selectedField.formId, 'customIsVisible', !e.target.checked)}
+              style={{ cursor: 'pointer' }}
+            />
+            <FaEye style={{ color: '#47B3FF', fontSize: '0.8rem' }} />
+            Hidden Field
+          </label>
+          <div style={{ fontSize: '0.8rem', color: '#4C677F', marginTop: '0.25rem', marginLeft: '1.5rem' }}>
+            Field is not visible to users but included in data
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Reset Button */}
       <button

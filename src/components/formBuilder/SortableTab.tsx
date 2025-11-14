@@ -50,29 +50,32 @@ export default function SortableTab({
       style={{
         ...style,
         padding: '0.75rem 1.5rem',
-        backgroundColor: isActive ? 'white' : 'transparent',
-        color: isActive ? '#1f2937' : '#6b7280',
-        border: 'none',
-        borderRadius: '6px',
+        paddingBottom: '0.85rem',
+        backgroundColor: isActive ? '#EFEBF2' : '#f8f9fa',
+        color: isActive ? '#2E3E4C' : '#6b7280',
+        border: isActive ? '1px solid #BEADCE' : '1px solid #dee2e6',
+        borderBottom: isActive ? 'none' : '1px solid #dee2e6',
+        borderRadius: '8px 8px 0 0',
         cursor: 'pointer',
         fontSize: '0.95rem',
         fontWeight: isActive ? '600' : '500',
         transition: 'all 0.2s ease',
-        boxShadow: isActive ? '0 2px 4px rgba(0, 0, 0, 0.1)' : 'none',
-        transform: isActive ? 'translateY(-1px)' : 'none',
+        position: 'relative',
+        marginBottom: '-2px',
+        zIndex: isActive ? 2 : 1,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'flex-start'
       }}
       onMouseEnter={(e) => {
         if (!isActive) {
-          e.currentTarget.style.backgroundColor = '#e5e7eb';
+          e.currentTarget.style.backgroundColor = '#e9ecef';
           e.currentTarget.style.color = '#374151';
         }
       }}
       onMouseLeave={(e) => {
         if (!isActive) {
-          e.currentTarget.style.backgroundColor = 'transparent';
+          e.currentTarget.style.backgroundColor = '#f8f9fa';
           e.currentTarget.style.color = '#6b7280';
         }
       }}

@@ -111,6 +111,15 @@ export default function FormBuilderPanel({
         const isRequired = field.customRequired !== undefined ? field.customRequired : field.required;
         const tooltip = field.customTooltip;
 
+        // For label fields, render without wrapper
+        if (field.type.toLowerCase() === 'label') {
+          return (
+            <div key={field.formId} style={{ marginBottom: '1rem' }}>
+              {renderInteractiveField(field)}
+            </div>
+          );
+        }
+
         return (
           <div key={field.formId} style={{
             marginBottom: '1rem',
@@ -181,14 +190,27 @@ export default function FormBuilderPanel({
             gap: gap,
             marginBottom: '1rem',
             padding: '0.75rem',
-            backgroundColor: '#f8fafc',
+            backgroundColor: '#EFEBF2',
             borderRadius: '6px',
-            border: '1px solid #e2e8f0'
+            border: '1px solid #BEADCE'
           }}>
             {blockFields.map((field) => {
               const title = field.customTitle || field.name;
               const isRequired = field.customRequired !== undefined ? field.customRequired : field.required;
               const tooltip = field.customTooltip;
+
+              // For label fields in horizontal blocks, render without wrapper
+              if (field.type.toLowerCase() === 'label') {
+                return (
+                  <div key={field.formId} style={{
+                    flex: '1 1 0',
+                    minWidth: minWidth,
+                    maxWidth: fieldCount >= 4 ? '200px' : 'none'
+                  }}>
+                    {renderInteractiveField(field)}
+                  </div>
+                );
+              }
 
               return (
                 <div key={field.formId} style={{
@@ -617,7 +639,7 @@ export default function FormBuilderPanel({
         display: 'flex',
         overflow: 'hidden'
       }}>
-        {/* Column 1: Table Fields */}
+        {/* Column 1: Table Fields / Label */}
         <div style={{
           width: '300px',
           backgroundColor: '#f8f9fa',
@@ -635,7 +657,7 @@ export default function FormBuilderPanel({
           }}>
             <FaTable style={{ color: '#47B3FF' }} />
             <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#333' }}>
-              Table Fields
+              Table Fields / Label
             </h3>
           </div>
 
@@ -679,6 +701,32 @@ export default function FormBuilderPanel({
                     }
                   </div>
                 )}
+              </div>
+
+              {/* Label Field - Always Available */}
+              <div style={{
+                marginTop: '1.5rem',
+                paddingTop: '1rem',
+                borderTop: '1px solid #dee2e6'
+              }}>
+                <div style={{
+                  fontSize: '0.85rem',
+                  fontWeight: 'bold',
+                  color: '#666',
+                  marginBottom: '0.5rem',
+                  textTransform: 'uppercase'
+                }}>
+                  Layout Elements
+                </div>
+                <DraggableField
+                  key="label-field"
+                  field={{
+                    id: 'label',
+                    name: 'Label',
+                    type: 'label',
+                    required: false
+                  }}
+                />
               </div>
             </>
           ) : (
@@ -963,12 +1011,9 @@ export default function FormBuilderPanel({
                         {/* Tab Headers */}
                         <div style={{
                           display: 'flex',
-                          backgroundColor: '#f8fafc',
-                          borderRadius: '8px',
-                          padding: '4px',
-                          marginBottom: '1.5rem',
-                          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-                          border: '1px solid #e2e8f0'
+                          gap: '4px',
+                          borderBottom: '2px solid #BEADCE',
+                          marginBottom: '0'
                         }}>
                           <SortableContext
                             items={tabOrder}
@@ -991,8 +1036,9 @@ export default function FormBuilderPanel({
                           <div style={{
                             padding: '1.5rem',
                             backgroundColor: '#EFEBF2',
-                            borderRadius: '8px',
-                            border: '1px solid #BEADCE'
+                            border: '1px solid #BEADCE',
+                            borderTop: 'none',
+                            borderRadius: '0 0 8px 8px'
                           }}>
                             {getFieldsByTableId(activeChildTab).length === 0 ? (
                               <div style={{

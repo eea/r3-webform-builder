@@ -109,7 +109,7 @@ export function renderFieldPreview(field: FormField) {
         </div>
       );
     case 'label':
-      const level = field.customLevel || field.level || 1;
+      const level = field.customLevel || field.level || 2;
       const HeadingTag = `h${Math.min(level, 6)}` as keyof JSX.IntrinsicElements;
       return (
         <HeadingTag style={{
@@ -343,7 +343,7 @@ export function renderInteractiveField(field: FormField) {
         </div>
       );
     case 'label':
-      const level = field.customLevel || field.level || 1;
+      const level = field.customLevel || field.level || 2;
       const HeadingTag = `h${Math.min(level, 6)}` as keyof JSX.IntrinsicElements;
       return (
         <HeadingTag style={{
