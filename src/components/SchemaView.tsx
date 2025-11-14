@@ -112,9 +112,6 @@ export default function SchemaView({ onFieldSelect, onDatasetChange }: SchemaVie
           <div className="tree-node-details">
             <div className={`tree-node-label ${isSelected ? 'selected' : ''}`}>
               {node.label}
-              {isHopelineChild && (
-                <span className="tree-node-badge hopeline">hopeline</span>
-              )}
             </div>
             <div className={`tree-node-subtitle ${isSelected ? 'selected' : ''}`}>
               {node.title} ({tableName})

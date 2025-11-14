@@ -263,9 +263,16 @@ export default function FormBuilderPanel({
 
   // Get child tables from tree structure
   const getChildTables = () => {
-    if (!state.hasRootTable || state.treeStructure.length === 0) return [];
-    const rootNode = state.treeStructure[0];
-    return rootNode.children || [];
+    if (state.treeStructure.length === 0) return [];
+
+    // If there's a root table, return its children
+    if (state.hasRootTable) {
+      const rootNode = state.treeStructure[0];
+      return rootNode.children || [];
+    }
+
+    // If there's no root table, return all tables as independent tabs
+    return state.treeStructure;
   };
 
   // Get child tables in sorted order
@@ -292,7 +299,7 @@ export default function FormBuilderPanel({
     if (childTables.length > 0 && tabOrder.length === 0) {
       setTabOrder(childTables.map(t => t.tableId));
     }
-  }, [state.treeStructure, tabOrder.length]);
+  }, [state.treeStructure, state.hasRootTable, tabOrder.length]);
 
   // Initialize active child tab
   useEffect(() => {
@@ -300,7 +307,7 @@ export default function FormBuilderPanel({
     if (childTables.length > 0 && !activeChildTab) {
       setActiveChildTab(childTables[0].tableId);
     }
-  }, [state.treeStructure, activeChildTab]);
+  }, [state.treeStructure, state.hasRootTable, activeChildTab]);
 
   // Fix existing fields without blockId
   useEffect(() => {
@@ -942,14 +949,16 @@ export default function FormBuilderPanel({
                     {/* Child Tables - Tab System */}
                     {getChildTables().length > 0 && (
                       <div style={{ marginBottom: '2rem' }}>
-                        <h3 style={{
-                          margin: '0 0 1rem 0',
-                          fontSize: '1.2rem',
-                          color: '#2E3E4C',
-                          fontWeight: 'bold'
-                        }}>
-                          Tabs
-                        </h3>
+                        {state.hasRootTable && (
+                          <h3 style={{
+                            margin: '0 0 1rem 0',
+                            fontSize: '1.2rem',
+                            color: '#2E3E4C',
+                            fontWeight: 'bold'
+                          }}>
+                            Tabs
+                          </h3>
+                        )}
 
                         {/* Tab Headers */}
                         <div style={{
