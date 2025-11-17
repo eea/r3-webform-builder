@@ -153,8 +153,8 @@ export function generateFormJSON(
   if (treeStructure.length > 0) {
     const processNode = (node: any, isRootTable: boolean = false) => {
       if (!processedTables.has(node.tableId)) {
-        const selectedDatasetObj = datasets.find(d => d.id === selectedDataset);
-        const tableData = selectedDatasetObj?.tables.find(t => t.id === node.tableId);
+        const selectedDatasetObj = datasets.find((d: any) => d.id === selectedDataset);
+        const tableData = selectedDatasetObj?.tables.find((t: any) => t.id === node.tableId);
         const nodeFields = fieldsByTable.get(node.tableId) || [];
 
         if (nodeFields.length > 0) {
@@ -294,9 +294,9 @@ export function importFormJSON(
       table.elements.forEach((element: any, elementIndex: number) => {
         if (element.type === 'FIELD') {
           // Find the corresponding field in available datasets
-          const selectedDatasetObj = datasets.find(d => d.id === selectedDataset);
-          const tableData = selectedDatasetObj?.tables.find(t => t.name === table.name);
-          const fieldData = tableData?.fields.find(f => f.name === element.name);
+          const selectedDatasetObj = datasets.find((d: any) => d.id === selectedDataset);
+          const tableData = selectedDatasetObj?.tables.find((t: any) => t.name === table.name);
+          const fieldData = tableData?.fields.find((f: any) => f.name === element.name);
 
           if (fieldData && tableData) {
             // Set the first table ID we encounter

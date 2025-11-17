@@ -6,16 +6,7 @@ import SchemaView from './components/SchemaView';
 import FormBuilderView from './components/FormBuilderView';
 import { fetchDatasets } from './services/api';
 import { FaRegSquareCaretRight, FaRegSquareCaretLeft } from 'react-icons/fa6';
-
-interface FormField {
-  id: string;
-  name: string;
-  type: string;
-  required: boolean;
-  description?: string;
-  formId: string;
-  tableId: string;
-}
+import type { FormField } from './types/formBuilder';
 
 function AppContent() {
   const { state, setConnection, setDatasets, setWebformName } = useApp();
