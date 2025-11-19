@@ -24,8 +24,9 @@ export default function FormBuilderPanel({
   onRemoveField,
   onGenerateJSON,
   onClearForm,
+  onUploadJSON,
 }: FormBuilderViewProps) {
-  const { state, setSelectedTreeTable, setWebformName, updateTableProperties } = useApp();
+  const { state, setSelectedTreeTable, setWebformName, updateTableProperties, addRootTableToTree, addChildTableToTree, removeTableFromTree } = useApp();
   const [showJSON, setShowJSON] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [formFields, setFormFields] = useState<FormField[]>(selectedFields);
@@ -100,13 +101,38 @@ export default function FormBuilderPanel({
   const availableFields = getAvailableFields();
   const currentTableFormFields = getCurrentTableFormFields();
 
-  // Initialize tab order
+  // Sync form fields with selected fields prop
+  useEffect(() => {
+    setFormFields(selectedFields);
+  }, [selectedFields]);
+
+  // Initialize and update tab order
   useEffect(() => {
     const childTables = getChildTables();
-    if (childTables.length > 0 && tabOrder.length === 0) {
-      setTabOrder(childTables.map((t: any) => t.tableId));
+    const childTableIds = childTables.map((t: any) => t.tableId);
+
+    // Only update if the child tables have actually changed
+    if (childTableIds.length > 0) {
+      const tabOrderSet = new Set(tabOrder);
+      const childTableSet = new Set(childTableIds);
+
+      // Check if they're different
+      const needsUpdate =
+        childTableIds.length !== tabOrder.length ||
+        childTableIds.some(id => !tabOrderSet.has(id)) ||
+        tabOrder.some(id => !childTableSet.has(id));
+
+      if (needsUpdate) {
+        // Preserve existing order where possible, add new tables at the end
+        const newOrder = [...tabOrder.filter(id => childTableSet.has(id))];
+        const newTables = childTableIds.filter(id => !tabOrderSet.has(id));
+        setTabOrder([...newOrder, ...newTables]);
+      }
+    } else if (tabOrder.length > 0) {
+      // No child tables, clear tab order
+      setTabOrder([]);
     }
-  }, [state.treeStructure, state.hasRootTable, tabOrder.length]);
+  }, [state.treeStructure, state.hasRootTable]);
 
   // Fix existing fields without blockId
   useEffect(() => {
@@ -286,17 +312,80 @@ export default function FormBuilderPanel({
         setWebformName(result.webformName);
       }
 
+      // Clear existing state
       setFormFields([]);
       setSelectedFormField(null);
+
+      // Reconstruct tree structure from JSON
+      if (jsonData.tables && Array.isArray(jsonData.tables) && jsonData.tables.length > 0) {
+        const selectedDatasetObj = state.datasets.find((d: any) => d.id === state.selectedDataset);
+
+        // Clear existing tree (make a copy to avoid mutation during iteration)
+        const existingNodes = [...state.treeStructure];
+        existingNodes.forEach((node: any) => {
+          removeTableFromTree(node.id);
+        });
+
+        // Build tree structure from JSON tables
+        // First table is the root table (if overview exists, it's a root table structure)
+        const hasOverview = jsonData.overview && Array.isArray(jsonData.overview) && jsonData.overview.length > 0;
+
+        jsonData.tables.forEach((table: any, index: number) => {
+          const tableData = selectedDatasetObj?.tables.find((t: any) => t.name === table.name);
+
+          if (tableData) {
+            if (index === 0 && hasOverview) {
+              // First table with overview is the root table
+              addRootTableToTree(tableData.id, table.label || table.name, table.title || table.name);
+            } else {
+              // All other tables are child tables/tabs
+              addChildTableToTree(tableData.id, table.label || table.name, table.title || table.name);
+            }
+          }
+        });
+      }
 
       if (result.formFields.length > 0) {
         setFormFields(result.formFields);
 
+        // Notify parent component to update its selectedFields state
+        if (onUploadJSON) {
+          onUploadJSON(result.formFields);
+        }
+
+        // Rebuild block order map for each table
+        const newBlockOrderMap: Record<string, number[]> = {};
+        const tableIds = [...new Set(result.formFields.map(f => f.tableId))];
+
+        tableIds.forEach(tableId => {
+          const tableFields = result.formFields.filter(f => f.tableId === tableId);
+          const blockIds = [...new Set(tableFields.map(f => f.blockId))].sort((a, b) => a - b);
+          newBlockOrderMap[tableId] = blockIds;
+        });
+
+        setBlockOrderMap(newBlockOrderMap);
+
+        // Rebuild tab order from JSON tables (excluding root table if present)
+        if (jsonData.tables && Array.isArray(jsonData.tables)) {
+          const selectedDatasetObj = state.datasets.find((d: any) => d.id === state.selectedDataset);
+          const hasOverview = jsonData.overview && Array.isArray(jsonData.overview) && jsonData.overview.length > 0;
+
+          const tabTableIds = jsonData.tables
+            .slice(hasOverview ? 1 : 0) // Skip first table if it's the root table
+            .map((table: any) => {
+              const tableData = selectedDatasetObj?.tables.find((t: any) => t.name === table.name);
+              return tableData?.id;
+            })
+            .filter((id: string | undefined) => id !== undefined);
+
+          if (tabTableIds.length > 0) {
+            setTabOrder(tabTableIds as string[]);
+          }
+        }
+
         if (result.firstTableId) {
           setSelectedTreeTable(result.firstTableId);
         }
-
-        alert(`Successfully restored form with ${result.formFields.length} fields from JSON.`);
       } else {
         alert('No matching fields found in the current dataset. Please ensure you have the correct dataset selected.');
       }

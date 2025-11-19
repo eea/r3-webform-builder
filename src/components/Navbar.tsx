@@ -9,8 +9,8 @@ export default function Navbar({
 }: NavbarProps) {
   return (
     <nav className="flex justify-between items-center px-8 py-4 w-full box-border fixed top-0 left-0 right-0 z-[1000]" style={{ backgroundColor: '#dee2e6', borderBottom: '1px solid #dee2e6', height: '60px' }}>
-      <h1 className="m-0 text-2xl" style={{ color: '#333' }}>
-        R3 WebFormBuilder
+      <h1 className="m-0 text-xl" style={{ fontSize: '2.5rem', color: '#333' }}>
+        R3 webform Builder
       </h1>
 
       <div className="flex items-center">

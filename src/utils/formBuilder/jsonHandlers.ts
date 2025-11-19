@@ -289,17 +289,21 @@ export function importFormJSON(
   const restoredFields: FormField[] = [];
   let firstTableId: string | null = null;
 
-  jsonData.tables.forEach((table: any, tableIndex: number) => {
+  const selectedDatasetObj = datasets.find((d: any) => d.id === selectedDataset);
+
+  jsonData.tables.forEach((table: any) => {
     if (table.elements && Array.isArray(table.elements)) {
+      let currentBlockId = 1;
+      const tableData = selectedDatasetObj?.tables.find((t: any) => t.name === table.name);
+
+      if (!tableData) return;
+
       table.elements.forEach((element: any, elementIndex: number) => {
         if (element.type === 'FIELD') {
-          // Find the corresponding field in available datasets
-          const selectedDatasetObj = datasets.find((d: any) => d.id === selectedDataset);
-          const tableData = selectedDatasetObj?.tables.find((t: any) => t.name === table.name);
-          const fieldData = tableData?.fields.find((f: any) => f.name === element.name);
+          // Standalone field - gets its own blockId
+          const fieldData = tableData.fields.find((f: any) => f.name === element.name);
 
-          if (fieldData && tableData) {
-            // Set the first table ID we encounter
+          if (fieldData) {
             if (firstTableId === null) {
               firstTableId = tableData.id;
             }
@@ -308,6 +312,7 @@ export function importFormJSON(
               ...fieldData,
               formId: `restored_${tableData.id}_${fieldData.id}_${Date.now()}_${elementIndex}`,
               tableId: tableData.id,
+              blockId: currentBlockId,
 
               // Override field type if specified in JSON
               type: element.fieldType || fieldData.type,
@@ -339,7 +344,59 @@ export function importFormJSON(
               referenceParentTable: element.referenceParentTable
             };
             restoredFields.push(formField);
+            currentBlockId++;
           }
+        } else if (element.type === 'BLOCK' && element.elements && Array.isArray(element.elements)) {
+          // Block with multiple fields - all get the same blockId
+          element.elements.forEach((blockElement: any, blockElementIndex: number) => {
+            if (blockElement.type === 'FIELD') {
+              const fieldData = tableData.fields.find((f: any) => f.name === blockElement.name);
+
+              if (fieldData) {
+                if (firstTableId === null) {
+                  firstTableId = tableData.id;
+                }
+
+                const formField: FormField = {
+                  ...fieldData,
+                  formId: `restored_${tableData.id}_${fieldData.id}_${Date.now()}_${elementIndex}_${blockElementIndex}`,
+                  tableId: tableData.id,
+                  blockId: currentBlockId,
+
+                  // Override field type if specified in JSON
+                  type: blockElement.fieldType || fieldData.type,
+
+                  // Basic properties
+                  customTitle: blockElement.title || fieldData.name,
+                  customTooltip: blockElement.tooltip || fieldData.description,
+                  customRequired: blockElement.showRequiredCharacter ?? fieldData.required,
+                  isPrimary: blockElement.isPrimary || false,
+
+                  // Advanced properties
+                  customReadOnly: blockElement.readOnly ?? fieldData.readOnly,
+                  customIsVisible: blockElement.isVisible ?? fieldData.isVisible,
+                  customAutoIncrement: blockElement.autoIncrement ?? fieldData.autoIncrement,
+                  customLevel: blockElement.level ?? fieldData.level,
+
+                  // Placeholder text
+                  customPlaceholder: blockElement.placeholder,
+
+                  // Codelist items
+                  customCodelistItems: blockElement.codelistItems || fieldData.codelistItems,
+
+                  // Dependencies and references
+                  dependency: blockElement.dependency ? {
+                    field: blockElement.dependency.field,
+                    value: blockElement.dependency.value
+                  } : undefined,
+                  referenceParentField: blockElement.referenceParentField,
+                  referenceParentTable: blockElement.referenceParentTable
+                };
+                restoredFields.push(formField);
+              }
+            }
+          });
+          currentBlockId++;
         }
       });
     }

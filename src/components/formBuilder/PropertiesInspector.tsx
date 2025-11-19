@@ -1,6 +1,8 @@
 import React from 'react';
 import { FaCog, FaEdit, FaLevelUpAlt, FaKey, FaEye } from 'react-icons/fa';
 import type { FormField } from '../../types/formBuilder';
+import { useApp } from '../../context/AppContext';
+import { findFieldDescription } from '../../utils/metadataParser';
 
 interface PropertiesInspectorProps {
   selectedField: FormField | null;
@@ -11,6 +13,8 @@ export default function PropertiesInspector({
   selectedField,
   onUpdateField
 }: PropertiesInspectorProps) {
+  const { state } = useApp();
+
   if (!selectedField) {
     return (
       <div style={{
@@ -28,6 +32,43 @@ export default function PropertiesInspector({
       </div>
     );
   }
+
+  // Handler for uploading placeholder from metadata catalog
+  const handleMetadataPlaceholderUpload = () => {
+    if (state.metadataCatalog.length === 0) {
+      alert('Please upload a metadata catalog first in the Schema panel.');
+      return;
+    }
+
+    // Find the actual table name from the tableId
+    const tableId = selectedField.tableId;
+    const fieldName = selectedField.name;
+
+    // Look up the table name from the datasets
+    let tableName: string | null = null;
+    for (const dataset of state.datasets) {
+      const table = dataset.tables.find(t => t.id === tableId);
+      if (table) {
+        tableName = table.name;
+        break;
+      }
+    }
+
+    if (!tableName) {
+      alert(`Could not find table information for field "${fieldName}".`);
+      return;
+    }
+
+    // Look up the description in the metadata catalog
+    const description = findFieldDescription(state.metadataCatalog, tableName, fieldName);
+
+    if (description) {
+      onUpdateField(selectedField.formId, 'customPlaceholder', description);
+      alert(`Placeholder set from metadata catalog:\n"${description}"`);
+    } else {
+      alert(`No description found in metadata catalog for table "${tableName}", field "${fieldName}".`);
+    }
+  };
 
   const handleReset = () => {
     onUpdateField(selectedField.formId, 'customTitle', undefined);
@@ -125,30 +166,15 @@ export default function PropertiesInspector({
               marginBottom: '0.5rem'
             }}
           />
-          <div className="mt-2">
-            <label className="inline-block px-3 py-2 bg-gray text-white rounded cursor-pointer text-sm text-center hover:bg-gray-dark transition-colors">
-              <input
-                type="file"
-                accept=".txt,.csv"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (evt) => {
-                      const text = evt.target?.result as string;
-                      onUpdateField(selectedField.formId, 'customPlaceholder', text.trim());
-                    };
-                    reader.readAsText(file);
-                  }
-                }}
-                className="hidden"
-              />
-              Upload Placeholder from File
-            </label>
-            <div className="text-xs text-gray mt-1">
-              Upload a .txt or .csv file to use as placeholder text
-            </div>
-          </div>
+          <button
+            onClick={handleMetadataPlaceholderUpload}
+            className="w-full px-3 py-2 text-white rounded cursor-pointer text-sm font-medium transition-colors border-none mt-2"
+            style={{ backgroundColor: '#50B0A4' }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#289588'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#50B0A4'}
+          >
+            Upload Placeholder from Metadata Catalog
+          </button>
         </div>
       )}
 

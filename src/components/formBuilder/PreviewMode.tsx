@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { DndContext } from '@dnd-kit/core';
+import { useState, useEffect } from 'react';
+import { DndContext, PointerSensor, KeyboardSensor, useSensor, useSensors, closestCenter } from '@dnd-kit/core';
 import type { DragEndEvent } from '@dnd-kit/core';
-import { SortableContext, horizontalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
+import { SortableContext, horizontalListSortingStrategy, arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { FaTable, FaPlus, FaEye, FaChevronDown } from 'react-icons/fa';
 import type { FormField } from '../../types/formBuilder';
 import type { TreeNode } from '../../context/AppContext';
@@ -30,6 +30,15 @@ export default function PreviewMode({
 }: PreviewModeProps) {
   const [isRootCollapsed, setIsRootCollapsed] = useState(false);
   const [activeChildTab, setActiveChildTab] = useState<string>('');
+
+  // Configure sensors for drag and drop
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    })
+  );
 
   // Get child tables from tree structure
   const getChildTables = (): TreeNode[] => {
@@ -107,17 +116,23 @@ export default function PreviewMode({
   const getTableIcon = () => <FaTable />;
   const childTables = getChildTables();
 
-  // Set initial active tab
-  if (childTables.length > 0 && !activeChildTab) {
-    setActiveChildTab(childTables[0].tableId);
-  }
+  // Set initial active tab when childTables change
+  useEffect(() => {
+    if (childTables.length > 0 && !activeChildTab) {
+      setActiveChildTab(childTables[0].tableId);
+    }
+  }, [childTables, activeChildTab]);
 
   if (treeStructure.length === 0) {
     return <EmptyPreview />;
   }
 
   return (
-    <DndContext onDragEnd={handleDragEnd}>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
+    >
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <PreviewHeader />
 

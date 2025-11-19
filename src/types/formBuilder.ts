@@ -39,4 +39,5 @@ export interface FormBuilderViewProps {
   onRemoveField: (formId: string) => void;
   onGenerateJSON: () => void;
   onClearForm: () => void;
+  onUploadJSON?: (fields: FormField[]) => void;
 }

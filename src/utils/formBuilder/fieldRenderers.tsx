@@ -178,7 +178,8 @@ export function renderInteractiveField(field: FormField) {
     borderRadius: '4px',
     fontSize: '1rem',
     fontFamily: 'inherit',
-    boxSizing: 'border-box' as const
+    boxSizing: 'border-box' as const,
+    backgroundColor: 'white'
   };
 
   const focusStyle = {

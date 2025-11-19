@@ -107,7 +107,7 @@ function AppContent() {
             textAlign: 'center'
           }}>
             <div>
-              <h2 style={{ fontSize: '2.5rem', margin: '0 0 1rem 0', color: '#333' }}>Welcome to R3 WebFormBuilder</h2>
+              <h2 style={{ fontSize: '2.5rem', margin: '0 0 1rem 0', color: '#333' }}>Welcome to R3 webform Builder</h2>
               <p style={{ fontSize: '1.2rem', color: '#666' }}>Click the Connection button to get started.</p>
             </div>
           </div>
@@ -173,6 +173,7 @@ function AppContent() {
               onRemoveField={handleRemoveField}
               onGenerateJSON={handleGenerateJSON}
               onClearForm={handleClearForm}
+              onUploadJSON={setSelectedFields}
             />
           </>
         )}

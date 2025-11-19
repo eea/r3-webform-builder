@@ -35,6 +35,16 @@ export interface TreeNode {
   children: TreeNode[];
 }
 
+export interface MetadataEntry {
+  identifier: string;
+  parentIdentifier: string;
+  objectType: string;
+  title: string;
+  description: string;
+  tableName?: string;
+  fieldName?: string;
+}
+
 interface AppState {
   connection: ConnectionData | null;
   datasets: Dataset[];
@@ -47,6 +57,7 @@ interface AppState {
   hasRootTable: boolean;
   selectedTreeTable: string;
   webformName: string;
+  metadataCatalog: MetadataEntry[];
 }
 
 interface AppContextType {
@@ -64,6 +75,7 @@ interface AppContextType {
   updateTableProperties: (tableId: string, label: string, title: string) => void;
   removeTableFromTree: (nodeId: string) => void;
   reorderChildTables: (oldIndex: number, newIndex: number) => void;
+  setMetadataCatalog: (metadata: MetadataEntry[]) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -80,7 +92,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     treeStructure: [],
     hasRootTable: false,
     selectedTreeTable: '',
-    webformName: ''
+    webformName: '',
+    metadataCatalog: []
   });
 
   // Load connection data, webform name, and selected dataset from cookies on component mount
@@ -306,6 +319,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const setMetadataCatalog = (metadata: MetadataEntry[]) => {
+    setState(prev => ({
+      ...prev,
+      metadataCatalog: metadata
+    }));
+  };
+
   return (
     <AppContext.Provider value={{
       state,
@@ -321,7 +341,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setWebformName,
       updateTableProperties,
       removeTableFromTree,
-      reorderChildTables
+      reorderChildTables,
+      setMetadataCatalog
     }}>
       {children}
     </AppContext.Provider>

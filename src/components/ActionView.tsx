@@ -53,9 +53,9 @@ export default function ActionView({ onDownloadJSON, onPushToRN3, onGenerateJSON
         <button
           onClick={handleUploadClick}
           className="w-full px-4 py-3 text-white border-none rounded-md cursor-pointer text-sm font-semibold flex items-center justify-center gap-2 transition-colors"
-          style={{ backgroundColor: '#E97C00' }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#C76800'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#E97C00'}
+          style={{ backgroundColor: '#50B0A4' }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#289588'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#50B0A4'}
         >
           <FaFileUpload />
           Upload JSON
