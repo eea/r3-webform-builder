@@ -62,42 +62,19 @@ export default function ConnectionModal({ isOpen, onClose, onSubmit }: Connectio
   };
 
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      zIndex: 1000
-    }}>
-      <div style={{
-        backgroundColor: 'white',
-        padding: '2rem',
-        borderRadius: '8px',
-        width: '400px',
-        maxWidth: '90%'
-      }}>
-        <h2 style={{ margin: '0 0 1rem 0' }}>Connection Settings</h2>
+    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-[1000]">
+      <div className="bg-white p-8 rounded-lg w-[400px] max-w-[90%]">
+        <h2 className="m-0 mb-4 text-2xl font-bold">Connection Settings</h2>
 
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem' }}>
-              Environment:<span style={{ color: '#B83230', marginLeft: '0.25rem' }}>*</span>
+          <div className="mb-4">
+            <label className="block mb-2">
+              Environment:<span className="text-[#B83230] ml-1">*</span>
             </label>
             <select
               value={environment}
               onChange={(e) => setEnvironment(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '0.5rem',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-                boxSizing: 'border-box'
-              }}
+              className="w-full p-2 border border-gray-300 rounded box-border"
               required
             >
               <option value="">Select Environment</option>
@@ -107,105 +84,68 @@ export default function ConnectionModal({ isOpen, onClose, onSubmit }: Connectio
             </select>
           </div>
 
-          <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem' }}>
-              API Key:<span style={{ color: '#B83230', marginLeft: '0.25rem' }}>*</span>
+          <div className="mb-4">
+            <label className="block mb-2">
+              API Key:<span className="text-[#B83230] ml-1">*</span>
             </label>
             <input
               type="text"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '0.5rem',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-                boxSizing: 'border-box'
-              }}
+              className="w-full p-2 border border-gray-300 rounded box-border"
               required
             />
           </div>
 
-          <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem' }}>
-              Dataflow ID:<span style={{ color: '#B83230', marginLeft: '0.25rem' }}>*</span>
+          <div className="mb-4">
+            <label className="block mb-2">
+              Dataflow ID:<span className="text-[#B83230] ml-1">*</span>
             </label>
             <input
               type="text"
               value={dataflowId}
               onChange={(e) => setDataflowId(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '0.5rem',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-                boxSizing: 'border-box'
-              }}
+              className="w-full p-2 border border-gray-300 rounded box-border"
               required
             />
           </div>
 
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem' }}>
+          <div className="mb-6">
+            <label className="block mb-2">
               Webform Name:
             </label>
             <input
               type="text"
               value={webformName}
               onChange={(e) => setWebformName(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '0.5rem',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-                boxSizing: 'border-box'
-              }}
+              className="w-full p-2 border border-gray-300 rounded box-border"
               placeholder="Enter webform name (optional)"
             />
           </div>
 
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="flex gap-4 justify-between items-center">
             <button
               type="button"
               onClick={handleClearSavedCredentials}
-              style={{
-                padding: '0.5rem 1rem',
-                backgroundColor: '#E56B38',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '0.85rem'
-              }}
+              className="text-white border-none rounded cursor-pointer"
+              style={{ backgroundColor: '#E56B38', padding: '0.375rem 0.75rem', fontSize: '0.875rem' }}
               title="Clear saved credentials and reset to defaults"
             >
               Clear Cookie
             </button>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div className="flex gap-2">
               <button
                 type="button"
                 onClick={onClose}
-                style={{
-                  padding: '0.5rem 1rem',
-                  backgroundColor: '#6c757d',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
+                className="text-white border-none rounded cursor-pointer"
+                style={{ backgroundColor: '#6c757d', padding: '0.375rem 0.75rem', fontSize: '0.875rem' }}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                style={{
-                  padding: '0.5rem 1rem',
-                  backgroundColor: '#0083E0',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
+                className="text-white border-none rounded cursor-pointer"
+                style={{ backgroundColor: '#0083E0', padding: '0.375rem 0.75rem', fontSize: '0.875rem' }}
               >
                 Submit
               </button>
