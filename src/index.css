@@ -1,6 +1,30 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  /* Custom Colors */
+  --color-primary: #47B3FF;
+  --color-primary-dark: #0083E0;
+  --color-primary-light: #A0D7FF;
+  --color-secondary: #289588;
+  --color-danger: #E56B38;
+  --color-danger-light: #FFEDD8;
+  --color-warning: #B83230;
+  --color-purple: #9E84B6;
+  --color-purple-dark: #5C3285;
+  --color-purple-light: #EFEBF2;
+  --color-purple-border: #BEADCE;
+  --color-gray: #4C677F;
+  --color-gray-light: #87A7C3;
+  --color-gray-border: #dee2e6;
+  --color-gray-bg: #f8f9fa;
+  --color-gray-dark: #2E3E4C;
+  --color-text: #333;
+  --color-text-dark: #2E3E4C;
+  --color-text-muted: #666;
+  --color-text-light: #8B5E34;
+  --color-success: #007B6C;
+  --color-info: #003052;
+}
 
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
