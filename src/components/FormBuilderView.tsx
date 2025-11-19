@@ -5,6 +5,7 @@ import { useApp } from '../context/AppContext';
 import { FaPlus, FaTable, FaWpforms, FaCog, FaEye, FaEdit } from 'react-icons/fa';
 import { getFieldIcon } from '../utils/formBuilder/fieldIcons';
 import { generateFormJSON, importFormJSON } from '../utils/formBuilder/jsonHandlers';
+import { uploadWebformToRN3 } from '../services/api';
 import { useDragAndDrop } from '../hooks/useDragAndDrop';
 import ActionView from './ActionView';
 import DraggableField from './formBuilder/DraggableField';
@@ -13,6 +14,7 @@ import PropertiesInspector from './formBuilder/PropertiesInspector';
 import FormBlock from './formBuilder/FormBlock';
 import SortableFormBlock from './formBuilder/SortableFormBlock';
 import PreviewMode from './formBuilder/PreviewMode';
+import PushToRN3Modal from './modals/PushToRN3Modal';
 import { panelStyles, buttonStyles, colors } from './formBuilder/styles';
 
 import type { Field, FormField, FormBuilderViewProps } from '../types/formBuilder';
@@ -33,6 +35,7 @@ export default function FormBuilderPanel({
   const [editLabel, setEditLabel] = useState('');
   const [blockOrderMap, setBlockOrderMap] = useState<Record<string, number[]>>({});
   const [tabOrder, setTabOrder] = useState<string[]>([]);
+  const [showPushModal, setShowPushModal] = useState(false);
 
   // Helper functions
   const getSelectedTableFields = (): Field[] => {
@@ -213,7 +216,66 @@ export default function FormBuilderPanel({
   };
 
   const handlePushToRN3 = () => {
-    alert('Push to RN3 functionality will be implemented soon!');
+    // Check if we have a connection and selected dataset
+    if (!state.connection) {
+      alert('Please connect to ReportNet first using the Connection modal.');
+      return;
+    }
+    if (!state.selectedDataset) {
+      alert('Please select a dataset first.');
+      return;
+    }
+    setShowPushModal(true);
+  };
+
+  const handlePushConfirm = async (fileName: string, type: 'TABLES' | 'ENTITIES' | 'PAMS' | 'Q&A', uploadedFile?: File) => {
+    if (!state.connection || !state.selectedDataset) {
+      alert('Connection or dataset not available.');
+      return;
+    }
+
+    try {
+      let jsonContent: string;
+
+      // If user uploaded a file, use that; otherwise use generated JSON
+      if (uploadedFile) {
+        jsonContent = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            try {
+              const text = e.target?.result as string;
+              // Validate it's valid JSON
+              JSON.parse(text);
+              resolve(text);
+            } catch (error) {
+              reject(new Error('Invalid JSON file'));
+            }
+          };
+          reader.onerror = () => reject(new Error('Error reading file'));
+          reader.readAsText(uploadedFile);
+        });
+      } else {
+        // Generate JSON from current form
+        jsonContent = generateJSON();
+      }
+
+      const result = await uploadWebformToRN3({
+        connection: state.connection,
+        datasetId: state.selectedDataset,
+        jsonContent,
+        fileName,
+        type
+      });
+
+      if (result.success) {
+        alert(result.message);
+      } else {
+        alert(result.message);
+      }
+    } catch (error) {
+      alert(`Error uploading to ReportNet: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error('Push to RN3 error:', error);
+    }
   };
 
   const handleUploadJSON = (jsonData: any) => {
@@ -351,6 +413,13 @@ export default function FormBuilderPanel({
           <DragPreview field={activeField} />
         ) : null}
       </DragOverlay>
+
+      {/* Push to RN3 Modal */}
+      <PushToRN3Modal
+        isOpen={showPushModal}
+        onClose={() => setShowPushModal(false)}
+        onPush={handlePushConfirm}
+      />
     </DndContext>
   );
 }

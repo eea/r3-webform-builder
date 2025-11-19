@@ -121,9 +121,43 @@ export default function PropertiesInspector({
               padding: '0.5rem',
               border: '1px solid #ccc',
               borderRadius: '4px',
-              fontSize: '0.9rem'
+              fontSize: '0.9rem',
+              marginBottom: '0.5rem'
             }}
           />
+          <div style={{ marginTop: '0.5rem' }}>
+            <label style={{
+              display: 'inline-block',
+              padding: '0.4rem 0.8rem',
+              backgroundColor: '#4C677F',
+              color: 'white',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '0.85rem',
+              textAlign: 'center'
+            }}>
+              <input
+                type="file"
+                accept=".txt,.csv"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (evt) => {
+                      const text = evt.target?.result as string;
+                      onUpdateField(selectedField.formId, 'customPlaceholder', text.trim());
+                    };
+                    reader.readAsText(file);
+                  }
+                }}
+                style={{ display: 'none' }}
+              />
+              Upload Placeholder from File
+            </label>
+            <div style={{ fontSize: '0.75rem', color: '#4C677F', marginTop: '0.25rem' }}>
+              Upload a .txt or .csv file to use as placeholder text
+            </div>
+          </div>
         </div>
       )}
 

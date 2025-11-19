@@ -180,3 +180,66 @@ export async function fetchDatasets(connection: ConnectionData): Promise<Dataset
     throw error;
   }
 }
+
+interface UploadWebformOptions {
+  connection: ConnectionData;
+  datasetId: string;
+  jsonContent: string;
+  fileName: string;
+  type?: 'TABLES' | 'ENTITIES' | 'PAMS' | 'Q&A';
+}
+
+/**
+ * Uploads a webform configuration JSON to ReportNet
+ * Based on OldApp implementation: /webform/{datasetId}/uploadWebformConfig?dataflowId={dataflowId}
+ */
+export async function uploadWebformToRN3(options: UploadWebformOptions): Promise<{ success: boolean; message: string }> {
+  const { connection, datasetId, jsonContent, fileName, type = 'TABLES' } = options;
+  const { environment, apiKey, dataflowId } = connection;
+
+  const currentEnvironment = environment === 'production' ? '' : `${environment}-`;
+  const apiBaseURL = `https://${currentEnvironment}api.reportnet.europa.eu`;
+  const uploadURL = `${apiBaseURL}/webform/${datasetId}/uploadWebformConfig?dataflowId=${dataflowId}`;
+
+  try {
+    console.log('Uploading webform configuration to:', uploadURL);
+    console.log('File name:', fileName);
+    console.log('Type:', type);
+
+    const requestBody = {
+      content: jsonContent,
+      name: fileName || 'WebformToolJson',
+      type: type
+    };
+
+    const response = await fetch(uploadURL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `ApiKey ${apiKey}`,
+      },
+      body: JSON.stringify(requestBody)
+    });
+
+    console.log('Upload response status:', response.status);
+
+    if (response.status === 200) {
+      return {
+        success: true,
+        message: 'The JSON file has been successfully uploaded to ReportNet.'
+      };
+    } else {
+      return {
+        success: false,
+        message: `There was an error uploading the JSON file. (Error ${response.status})`
+      };
+    }
+
+  } catch (error) {
+    console.error('Error uploading webform configuration:', error);
+    return {
+      success: false,
+      message: `There was an error uploading the JSON file: ${error instanceof Error ? error.message : 'Unknown error'}`
+    };
+  }
+}
