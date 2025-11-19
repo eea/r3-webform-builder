@@ -27,7 +27,7 @@ interface ConnectionData {
   dataflowId: string;
 }
 
-interface TreeNode {
+export interface TreeNode {
   id: string;
   tableId: string;
   label: string;

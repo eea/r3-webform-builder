@@ -13,33 +13,52 @@ interface ConnectionModalProps {
 }
 
 export default function ConnectionModal({ isOpen, onClose, onSubmit }: ConnectionModalProps) {
-  const [environment, setEnvironment] = useState('');
-  const [apiKey, setApiKey] = useState('');
-  const [dataflowId, setDataflowId] = useState('');
-  const [webformName, setWebformName] = useState('');
+  // TODO: Remove default values before production deployment
+  // Default development credentials
+  const DEV_ENVIRONMENT = 'sandbox';
+  const DEV_API_KEY = '2ad75cfa-7021-4332-9557-877cab580268';
+  const DEV_DATAFLOW_ID = '11734';
 
-  // Load saved connection settings when modal opens
-  useEffect(() => {
-    if (isOpen) {
-      const savedConnection = connectionCookieUtils.loadConnection();
-      if (savedConnection) {
-        setEnvironment(savedConnection.environment);
-        setApiKey(savedConnection.apiKey);
-        setDataflowId(savedConnection.dataflowId);
-      }
+  // Initialize with default values or saved cookies
+  const [environment, setEnvironment] = useState(() => {
+    const saved = connectionCookieUtils.loadConnection();
+    return saved ? saved.environment : DEV_ENVIRONMENT;
+  });
 
-      const savedWebformName = connectionCookieUtils.loadWebformName();
-      if (savedWebformName) {
-        setWebformName(savedWebformName);
-      }
-    }
-  }, [isOpen]);
+  const [apiKey, setApiKey] = useState(() => {
+    const saved = connectionCookieUtils.loadConnection();
+    return saved ? saved.apiKey : DEV_API_KEY;
+  });
+
+  const [dataflowId, setDataflowId] = useState(() => {
+    const saved = connectionCookieUtils.loadConnection();
+    return saved ? saved.dataflowId : DEV_DATAFLOW_ID;
+  });
+
+  const [webformName, setWebformName] = useState(() => {
+    const saved = connectionCookieUtils.loadWebformName();
+    return saved || '';
+  });
 
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit({ environment, apiKey, dataflowId, webformName });
+  };
+
+  const handleClearSavedCredentials = () => {
+    // Clear all saved connection data
+    connectionCookieUtils.clearConnection();
+    connectionCookieUtils.clearWebformName();
+
+    // Reset to default values
+    setEnvironment(DEV_ENVIRONMENT);
+    setApiKey(DEV_API_KEY);
+    setDataflowId(DEV_DATAFLOW_ID);
+    setWebformName('');
+
+    alert('Saved credentials cleared successfully!');
   };
 
   return (
@@ -145,34 +164,52 @@ export default function ConnectionModal({ isOpen, onClose, onSubmit }: Connectio
             />
           </div>
 
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'space-between', alignItems: 'center' }}>
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClearSavedCredentials}
               style={{
                 padding: '0.5rem 1rem',
-                backgroundColor: '#6c757d',
+                backgroundColor: '#E56B38',
                 color: 'white',
                 border: 'none',
                 borderRadius: '4px',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                fontSize: '0.85rem'
               }}
+              title="Clear saved credentials and reset to defaults"
             >
-              Cancel
+              Clear Cookie
             </button>
-            <button
-              type="submit"
-              style={{
-                padding: '0.5rem 1rem',
-                backgroundColor: '#0083E0',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}
-            >
-              Submit
-            </button>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button
+                type="button"
+                onClick={onClose}
+                style={{
+                  padding: '0.5rem 1rem',
+                  backgroundColor: '#6c757d',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                style={{
+                  padding: '0.5rem 1rem',
+                  backgroundColor: '#0083E0',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                Submit
+              </button>
+            </div>
           </div>
         </form>
       </div>
