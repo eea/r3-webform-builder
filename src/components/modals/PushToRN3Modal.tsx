@@ -55,15 +55,15 @@ export default function PushToRN3Modal({ isOpen, onClose, onPush }: PushToRN3Mod
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
       <div className="bg-white rounded-lg p-8 w-11/12 max-w-lg shadow-xl">
-        <h2 className="mt-0 mb-6 text-text-dark text-2xl font-semibold">
+        <h2 className="mt-0 mb-6 text-2xl font-semibold" style={{ color: '#2E3E4C' }}>
           Push JSON to ReportNet
         </h2>
 
         <form onSubmit={handleSubmit}>
           {/* Warning/Info Section */}
-          <div className="bg-primary-light p-4 rounded mb-6 text-sm text-gray">
+          <div className="p-4 rounded mb-6 text-sm" style={{ backgroundColor: '#A0D7FF', color: '#4C677F' }}>
             <strong>Design Status</strong>
             <p className="mt-2 mb-0">
               This will upload your webform configuration to ReportNet.
@@ -72,26 +72,33 @@ export default function PushToRN3Modal({ isOpen, onClose, onPush }: PushToRN3Mod
 
           {/* Upload JSON from file (Optional) */}
           <div className="mb-6">
-            <label className="block mb-2 font-bold text-gray">
+            <label className="block mb-2 font-bold" style={{ color: '#4C677F' }}>
               Upload JSON from File (Optional)
             </label>
-            <p className="text-xs text-text-muted mt-0 mb-2 italic">
+            <p className="text-xs mt-0 mb-2 italic" style={{ color: '#666' }}>
               If you upload a file, it will be used instead of the generated JSON
             </p>
 
             {uploadedFile ? (
-              <div className="flex items-center gap-2 p-2 bg-green-50 rounded border border-green-500">
+              <div className="flex items-center gap-2 p-2 rounded border" style={{ backgroundColor: '#e8f5e9', borderColor: '#4caf50' }}>
                 <span className="flex-1 text-sm">{uploadedFile.name}</span>
                 <button
                   type="button"
                   onClick={handleClearFile}
-                  className="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 transition-colors"
+                  className="px-2 py-1 text-white rounded text-xs transition-colors"
+                  style={{ backgroundColor: '#f44336' }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d32f2f'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f44336'}
                 >
                   Remove
                 </button>
               </div>
             ) : (
-              <label className="inline-block px-4 py-2 bg-gray text-white rounded cursor-pointer text-sm text-center hover:bg-gray-dark transition-colors">
+              <label className="inline-block px-4 py-2 text-white rounded cursor-pointer text-sm text-center transition-colors"
+                style={{ backgroundColor: '#4C677F' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2E3E4C'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#4C677F'}
+              >
                 <input
                   type="file"
                   accept=".json"
@@ -105,13 +112,14 @@ export default function PushToRN3Modal({ isOpen, onClose, onPush }: PushToRN3Mod
 
           {/* JSON Type Selection */}
           <div className="mb-6">
-            <label className="block mb-2 font-bold text-gray">
+            <label className="block mb-2 font-bold" style={{ color: '#4C677F' }}>
               Select JSON Type
             </label>
             <select
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value as 'TABLES' | 'ENTITIES' | 'PAMS' | 'Q&A')}
-              className="w-full px-3 py-3 text-base border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="w-full px-3 py-3 text-base border rounded focus:outline-none focus:ring-2 focus:border-transparent"
+              style={{ borderColor: '#ccc' }}
             >
               <option value="TABLES">Tables</option>
               <option value="ENTITIES">Entities</option>
@@ -122,10 +130,10 @@ export default function PushToRN3Modal({ isOpen, onClose, onPush }: PushToRN3Mod
 
           {/* File Name Input */}
           <div className="mb-6">
-            <label className="block mb-2 font-bold text-gray">
+            <label className="block mb-2 font-bold" style={{ color: '#4C677F' }}>
               File Name*
             </label>
-            <p className="text-xs text-text-muted mt-0 mb-2 italic">
+            <p className="text-xs mt-0 mb-2 italic" style={{ color: '#666' }}>
               Note: Same name will overwrite previous version
             </p>
             <input
@@ -134,7 +142,8 @@ export default function PushToRN3Modal({ isOpen, onClose, onPush }: PushToRN3Mod
               onChange={(e) => setFileName(e.target.value)}
               placeholder="Enter file name"
               required
-              className="w-full px-3 py-3 text-base border border-gray-300 rounded box-border focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="w-full px-3 py-3 text-base border rounded box-border focus:outline-none focus:ring-2 focus:border-transparent"
+              style={{ borderColor: '#ccc' }}
             />
           </div>
 
@@ -144,14 +153,20 @@ export default function PushToRN3Modal({ isOpen, onClose, onPush }: PushToRN3Mod
               type="button"
               onClick={onClose}
               disabled={isPushing}
-              className="px-6 py-3 bg-gray-500 text-white rounded text-base hover:bg-gray-600 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+              className="px-6 py-3 text-white rounded text-base disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+              style={{ backgroundColor: '#6c757d' }}
+              onMouseEnter={(e) => !isPushing && (e.currentTarget.style.backgroundColor = '#5a6268')}
+              onMouseLeave={(e) => !isPushing && (e.currentTarget.style.backgroundColor = '#6c757d')}
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isPushing || !fileName.trim()}
-              className="px-6 py-3 bg-blue-600 text-white rounded text-base font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              className="px-6 py-3 text-white rounded text-base font-semibold disabled:cursor-not-allowed transition-colors"
+              style={{ backgroundColor: (isPushing || !fileName.trim()) ? '#ccc' : '#006BB8' }}
+              onMouseEnter={(e) => !(isPushing || !fileName.trim()) && (e.currentTarget.style.backgroundColor = '#004B7F')}
+              onMouseLeave={(e) => !(isPushing || !fileName.trim()) && (e.currentTarget.style.backgroundColor = '#006BB8')}
             >
               {isPushing ? 'Pushing...' : 'Push to RN3'}
             </button>

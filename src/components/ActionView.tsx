@@ -38,11 +38,11 @@ export default function ActionView({ onDownloadJSON, onPushToRN3, onGenerateJSON
   };
 
   return (
-    <div className="border-t border-blue-light pt-4 mt-4">
+    <div className="border-t pt-4 mt-4" style={{ borderColor: '#DAE8F4' }}>
       {/* Header */}
-      <div className="flex items-center gap-2 mb-4 pb-2 border-b border-blue-light">
-        <FaCode className="text-primary" />
-        <h3 className="m-0 text-base text-text-dark font-bold">
+      <div className="flex items-center gap-2 mb-4 pb-2 border-b" style={{ borderColor: '#DAE8F4' }}>
+        <FaCode style={{ color: '#47B3FF' }} />
+        <h3 className="m-0 text-base font-bold" style={{ color: '#2E3E4C' }}>
           Actions
         </h3>
       </div>
@@ -52,7 +52,10 @@ export default function ActionView({ onDownloadJSON, onPushToRN3, onGenerateJSON
         {/* Upload JSON Button */}
         <button
           onClick={handleUploadClick}
-          className="w-full px-4 py-3 bg-orange text-white border-none rounded-md cursor-pointer text-sm font-semibold flex items-center justify-center gap-2 transition-colors hover:bg-orange-dark"
+          className="w-full px-4 py-3 text-white border-none rounded-md cursor-pointer text-sm font-semibold flex items-center justify-center gap-2 transition-colors"
+          style={{ backgroundColor: '#E97C00' }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#C76800'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#E97C00'}
         >
           <FaFileUpload />
           Upload JSON
@@ -72,7 +75,10 @@ export default function ActionView({ onDownloadJSON, onPushToRN3, onGenerateJSON
             onGenerateJSON();
             onDownloadJSON();
           }}
-          className="w-full px-4 py-3 bg-secondary text-white border-none rounded-md cursor-pointer text-sm font-semibold flex items-center justify-center gap-2 transition-colors hover:bg-secondary-dark"
+          className="w-full px-4 py-3 text-white border-none rounded-md cursor-pointer text-sm font-semibold flex items-center justify-center gap-2 transition-colors"
+          style={{ backgroundColor: '#50B0A4' }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#289588'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#50B0A4'}
         >
           <FaDownload />
           Download JSON
@@ -81,7 +87,10 @@ export default function ActionView({ onDownloadJSON, onPushToRN3, onGenerateJSON
         {/* Push to RN3 Button */}
         <button
           onClick={onPushToRN3}
-          className="w-full px-4 py-3 bg-blue text-white border-none rounded-md cursor-pointer text-sm font-semibold flex items-center justify-center gap-2 transition-colors hover:bg-blue-dark"
+          className="w-full px-4 py-3 text-white border-none rounded-md cursor-pointer text-sm font-semibold flex items-center justify-center gap-2 transition-colors"
+          style={{ backgroundColor: '#006BB8' }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#004B7F'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#006BB8'}
         >
           <FaUpload />
           Push to RN3
@@ -89,7 +98,7 @@ export default function ActionView({ onDownloadJSON, onPushToRN3, onGenerateJSON
       </div>
 
       {/* Info Text */}
-      <div className="mt-3 p-2 bg-blue-light rounded text-xs text-gray italic text-center">
+      <div className="mt-3 p-2 rounded text-xs italic text-center" style={{ backgroundColor: '#DAE8F4', color: '#4C677F' }}>
         Generate and export your form configuration
       </div>
     </div>
