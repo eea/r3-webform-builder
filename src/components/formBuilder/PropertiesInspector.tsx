@@ -125,17 +125,8 @@ export default function PropertiesInspector({
               marginBottom: '0.5rem'
             }}
           />
-          <div style={{ marginTop: '0.5rem' }}>
-            <label style={{
-              display: 'inline-block',
-              padding: '0.4rem 0.8rem',
-              backgroundColor: '#4C677F',
-              color: 'white',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '0.85rem',
-              textAlign: 'center'
-            }}>
+          <div className="mt-2">
+            <label className="inline-block px-3 py-2 bg-gray text-white rounded cursor-pointer text-sm text-center hover:bg-gray-dark transition-colors">
               <input
                 type="file"
                 accept=".txt,.csv"
@@ -150,11 +141,11 @@ export default function PropertiesInspector({
                     reader.readAsText(file);
                   }
                 }}
-                style={{ display: 'none' }}
+                className="hidden"
               />
               Upload Placeholder from File
             </label>
-            <div style={{ fontSize: '0.75rem', color: '#4C677F', marginTop: '0.25rem' }}>
+            <div className="text-xs text-gray mt-1">
               Upload a .txt or .csv file to use as placeholder text
             </div>
           </div>

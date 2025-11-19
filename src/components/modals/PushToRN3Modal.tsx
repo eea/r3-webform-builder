@@ -55,109 +55,48 @@ export default function PushToRN3Modal({ isOpen, onClose, onPush }: PushToRN3Mod
   };
 
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 1000
-    }}>
-      <div style={{
-        backgroundColor: 'white',
-        borderRadius: '8px',
-        padding: '2rem',
-        width: '90%',
-        maxWidth: '500px',
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)'
-      }}>
-        <h2 style={{ marginTop: 0, marginBottom: '1.5rem', color: '#2E3E4C' }}>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-8 w-11/12 max-w-lg shadow-xl">
+        <h2 className="mt-0 mb-6 text-text-dark text-2xl font-semibold">
           Push JSON to ReportNet
         </h2>
 
         <form onSubmit={handleSubmit}>
           {/* Warning/Info Section */}
-          <div style={{
-            backgroundColor: '#DAE8F4',
-            padding: '1rem',
-            borderRadius: '4px',
-            marginBottom: '1.5rem',
-            fontSize: '0.9rem',
-            color: '#4C677F'
-          }}>
+          <div className="bg-primary-light p-4 rounded mb-6 text-sm text-gray">
             <strong>Design Status</strong>
-            <p style={{ margin: '0.5rem 0 0 0' }}>
+            <p className="mt-2 mb-0">
               This will upload your webform configuration to ReportNet.
             </p>
           </div>
 
           {/* Upload JSON from file (Optional) */}
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{
-              display: 'block',
-              marginBottom: '0.5rem',
-              fontWeight: 'bold',
-              color: '#4C677F'
-            }}>
+          <div className="mb-6">
+            <label className="block mb-2 font-bold text-gray">
               Upload JSON from File (Optional)
             </label>
-            <p style={{
-              fontSize: '0.85rem',
-              color: '#6c757d',
-              marginTop: '0',
-              marginBottom: '0.5rem',
-              fontStyle: 'italic'
-            }}>
+            <p className="text-xs text-text-muted mt-0 mb-2 italic">
               If you upload a file, it will be used instead of the generated JSON
             </p>
 
             {uploadedFile ? (
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.5rem',
-                backgroundColor: '#e8f5e9',
-                borderRadius: '4px',
-                border: '1px solid #4caf50'
-              }}>
-                <span style={{ flex: 1, fontSize: '0.9rem' }}>{uploadedFile.name}</span>
+              <div className="flex items-center gap-2 p-2 bg-green-50 rounded border border-green-500">
+                <span className="flex-1 text-sm">{uploadedFile.name}</span>
                 <button
                   type="button"
                   onClick={handleClearFile}
-                  style={{
-                    padding: '0.25rem 0.5rem',
-                    backgroundColor: '#f44336',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '0.8rem'
-                  }}
+                  className="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 transition-colors"
                 >
                   Remove
                 </button>
               </div>
             ) : (
-              <label style={{
-                display: 'inline-block',
-                padding: '0.5rem 1rem',
-                backgroundColor: '#4C677F',
-                color: 'white',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '0.9rem',
-                textAlign: 'center'
-              }}>
+              <label className="inline-block px-4 py-2 bg-gray text-white rounded cursor-pointer text-sm text-center hover:bg-gray-dark transition-colors">
                 <input
                   type="file"
                   accept=".json"
                   onChange={handleFileUpload}
-                  style={{ display: 'none' }}
+                  className="hidden"
                 />
                 Choose JSON File
               </label>
@@ -165,25 +104,14 @@ export default function PushToRN3Modal({ isOpen, onClose, onPush }: PushToRN3Mod
           </div>
 
           {/* JSON Type Selection */}
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{
-              display: 'block',
-              marginBottom: '0.5rem',
-              fontWeight: 'bold',
-              color: '#4C677F'
-            }}>
+          <div className="mb-6">
+            <label className="block mb-2 font-bold text-gray">
               Select JSON Type
             </label>
             <select
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value as 'TABLES' | 'ENTITIES' | 'PAMS' | 'Q&A')}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                fontSize: '1rem',
-                border: '1px solid #ccc',
-                borderRadius: '4px'
-              }}
+              className="w-full px-3 py-3 text-base border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             >
               <option value="TABLES">Tables</option>
               <option value="ENTITIES">Entities</option>
@@ -193,22 +121,11 @@ export default function PushToRN3Modal({ isOpen, onClose, onPush }: PushToRN3Mod
           </div>
 
           {/* File Name Input */}
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{
-              display: 'block',
-              marginBottom: '0.5rem',
-              fontWeight: 'bold',
-              color: '#4C677F'
-            }}>
+          <div className="mb-6">
+            <label className="block mb-2 font-bold text-gray">
               File Name*
             </label>
-            <p style={{
-              fontSize: '0.85rem',
-              color: '#6c757d',
-              marginTop: '0',
-              marginBottom: '0.5rem',
-              fontStyle: 'italic'
-            }}>
+            <p className="text-xs text-text-muted mt-0 mb-2 italic">
               Note: Same name will overwrite previous version
             </p>
             <input
@@ -217,49 +134,24 @@ export default function PushToRN3Modal({ isOpen, onClose, onPush }: PushToRN3Mod
               onChange={(e) => setFileName(e.target.value)}
               placeholder="Enter file name"
               required
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                fontSize: '1rem',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-                boxSizing: 'border-box'
-              }}
+              className="w-full px-3 py-3 text-base border border-gray-300 rounded box-border focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             />
           </div>
 
           {/* Action Buttons */}
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+          <div className="flex gap-4 justify-end">
             <button
               type="button"
               onClick={onClose}
               disabled={isPushing}
-              style={{
-                padding: '0.75rem 1.5rem',
-                backgroundColor: '#6c757d',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: isPushing ? 'not-allowed' : 'pointer',
-                fontSize: '1rem',
-                opacity: isPushing ? 0.6 : 1
-              }}
+              className="px-6 py-3 bg-gray-500 text-white rounded text-base hover:bg-gray-600 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isPushing || !fileName.trim()}
-              style={{
-                padding: '0.75rem 1.5rem',
-                backgroundColor: isPushing || !fileName.trim() ? '#ccc' : '#006BB8',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: isPushing || !fileName.trim() ? 'not-allowed' : 'pointer',
-                fontSize: '1rem',
-                fontWeight: '600'
-              }}
+              className="px-6 py-3 bg-blue-600 text-white rounded text-base font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
             >
               {isPushing ? 'Pushing...' : 'Push to RN3'}
             </button>
