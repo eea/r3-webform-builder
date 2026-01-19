@@ -72,13 +72,34 @@ npm run lint
 
 The application is containerized using a multi-stage Docker build with Nginx.
 
-### Build Docker Image
+### Run from Docker Hub
+
+Pull and run the latest version from Docker Hub:
+
+```bash
+# Pull the latest image
+docker pull seb9999/r3-webform-builder:latest
+
+# Run the container (map to port 8080 on your machine)
+docker run -d -p 8080:80 --name r3-webform-builder seb9999/r3-webform-builder:latest
+
+# Access the application at http://localhost:8080
+```
+
+Stop and remove the container:
+
+```bash
+docker stop r3-webform-builder
+docker rm r3-webform-builder
+```
+
+### Build Docker Image Locally
 
 ```bash
 docker build -t r3-webform-builder:1.0.0 .
 ```
 
-### Run Docker Container
+### Run Local Docker Container
 
 ```bash
 docker run -d -p 80:80 r3-webform-builder:1.0.0
